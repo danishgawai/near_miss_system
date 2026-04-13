@@ -1,0 +1,7 @@
+ultralytics 
+openpyxl 
+pandas 
+opencv-python 
+lap 
+cython_bbox 
+shapely
