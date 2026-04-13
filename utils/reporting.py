@@ -18,6 +18,7 @@ class Reporter:
 
         risk_dist = defaultdict(int)
         type_dist = defaultdict(int)
+        scenario_dist = defaultdict(int)       # NEW
         temporal = defaultdict(int)
         classes = defaultdict(int)
         frame_count = defaultdict(int)
@@ -26,6 +27,10 @@ class Reporter:
         for e in self.events:
             risk_dist[e["risk"]] += 1
             type_dist[e["type"]] += 1
+            # NEW: track scenario distribution
+            scenario = e.get("scenario", "unknown")
+            scenario_dist[scenario] += 1
+
             w = (e["frame"] // window) * 10
             temporal[f"{w}-{w+10}s"] += 1
             for k in ("actor_1", "actor_2"):
@@ -39,6 +44,7 @@ class Reporter:
             "total_near_misses": total,
             "risk_distribution": dict(risk_dist),
             "type_distribution": dict(type_dist),
+            "scenario_distribution": dict(scenario_dist),   # NEW
             "temporal_analysis": dict(temporal),
             "involved_classes": dict(classes),
             "peak_frames": [{"frame": f, "count": c} for f, c in peak]
@@ -63,6 +69,9 @@ def save_dashboard(summary: dict, path: str):
     temp_values = json.dumps(list(summary.get("temporal_analysis", {}).values()))
     cls_labels = json.dumps(list(summary.get("involved_classes", {}).keys()))
     cls_values = json.dumps(list(summary.get("involved_classes", {}).values()))
+    # NEW: scenario chart data
+    scen_labels = json.dumps(list(summary.get("scenario_distribution", {}).keys()))
+    scen_values = json.dumps(list(summary.get("scenario_distribution", {}).values()))
 
     total = summary.get("total_near_misses", 0)
     high = summary.get("risk_distribution", {}).get("High", 0)
@@ -99,6 +108,7 @@ def save_dashboard(summary: dict, path: str):
   <div class="chart-box"><canvas id="c1"></canvas></div>
   <div class="chart-box"><canvas id="c2"></canvas></div>
   <div class="chart-box"><canvas id="c3"></canvas></div>
+  <div class="chart-box"><canvas id="c4"></canvas></div>
 </div>
 <script>
 new Chart(document.getElementById('c1'),{{
@@ -115,6 +125,11 @@ new Chart(document.getElementById('c3'),{{
   type:'bar',
   data:{{labels:{cls_labels},datasets:[{{label:'Count',data:{cls_values},backgroundColor:'#0f3460'}}]}},
   options:{{indexAxis:'y',plugins:{{title:{{display:true,text:'Object Classes Involved',color:'#eee'}}}},scales:{{x:{{ticks:{{color:'#aaa'}}}},y:{{ticks:{{color:'#aaa'}}}}}}}}
+}});
+new Chart(document.getElementById('c4'),{{
+  type:'doughnut',
+  data:{{labels:{scen_labels},datasets:[{{data:{scen_values},backgroundColor:['#0f3460','#e94560','#a855f7','#f59e0b','#10b981']}}]}},
+  options:{{plugins:{{title:{{display:true,text:'Scenario Types',color:'#eee'}}}}}}
 }});
 </script>
 </body>

@@ -10,6 +10,16 @@ RISK_COLORS = {
     "Low": (255, 170, 0),
 }
 
+# NEW: Scenario-specific accent colors for incident labels
+SCENARIO_COLORS = {
+    "rear_end": (0, 100, 255),
+    "merging": (0, 200, 200),
+    "crossing": (200, 0, 200),
+    "head_on": (0, 0, 255),
+    "hard_brake": (0, 200, 255),
+    "swerve": (255, 100, 0),
+}
+
 
 def build_risk_map(incidents: List[dict]) -> Dict[int, str]:
     pr = {"High": 3, "Medium": 2, "Low": 1}
@@ -69,12 +79,18 @@ def draw_frame(
     y = 35
     for inc in incidents[:6]:
         risk = inc.get("risk", "Low")
-        color = RISK_COLORS.get(risk, (255, 255, 255))
+        scenario = inc.get("scenario", "")
+        color = SCENARIO_COLORS.get(scenario, RISK_COLORS.get(risk, (255, 255, 255)))
+
+        # NEW: show scenario type in the overlay
         txt = f"[{risk}] {inc['type']}"
         if inc.get("ttc_s") is not None:
             txt += f" TTC:{inc['ttc_s']}s"
         if inc.get("distance_m") is not None:
             txt += f" D:{inc['distance_m']}m"
+        if inc.get("lateral_acc_mps2") is not None:
+            txt += f" LatAcc:{inc['lateral_acc_mps2']}m/s²"
+
         (tw, th), _ = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.65, 2)
         cv2.rectangle(frame, (15, y - th - 5), (25 + tw, y + 5), (0, 0, 0), -1)
         cv2.putText(frame, txt, (20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
