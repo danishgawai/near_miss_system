@@ -232,6 +232,7 @@ If hard-braking is too noisy:
 ### 3) Tracker ID switching
 - Tune `match_thresh`, `track_buffer`
 - Increase tracking stabilization
+- Centroid Point selection not optimal for accurate events.
 - Consider stronger tracker variant (future scope)
 
 ---
