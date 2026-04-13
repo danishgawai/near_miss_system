@@ -1,152 +1,2098 @@
 {
-  "generated_at": "2026-04-13T08:50:32.352450",
+  "generated_at": "2026-04-13T17:37:17.923804",
   "summary": {
-    "total_near_misses": 9,
+    "total_near_misses": 84,
     "risk_distribution": {
-      "Medium": 9
+      "Low": 33,
+      "High": 11,
+      "Medium": 40
     },
     "type_distribution": {
-      "Hard Braking": 9
+      "Near-Miss Collision": 49,
+      "Hard Braking": 35
     },
     "temporal_analysis": {
-      "10-20s": 6,
-      "20-30s": 3
+      "0-10s": 3,
+      "10-20s": 13,
+      "20-30s": 2,
+      "30-40s": 5,
+      "40-50s": 8,
+      "50-60s": 4,
+      "60-70s": 6,
+      "70-80s": 7,
+      "80-90s": 3,
+      "90-100s": 5,
+      "100-110s": 4,
+      "110-120s": 7,
+      "120-130s": 7,
+      "130-140s": 5,
+      "140-150s": 3,
+      "160-170s": 2
     },
     "involved_classes": {
-      "truck": 1,
-      "bus": 5,
-      "car": 3
+      "truck": 11,
+      "car": 116,
+      "bus": 6
     },
     "peak_frames": [
       {
-        "frame": 250,
-        "count": 1
+        "frame": 1138,
+        "count": 3
       },
       {
-        "frame": 371,
-        "count": 1
+        "frame": 262,
+        "count": 2
       },
       {
-        "frame": 372,
-        "count": 1
+        "frame": 291,
+        "count": 2
       },
       {
-        "frame": 373,
-        "count": 1
+        "frame": 294,
+        "count": 2
       },
       {
-        "frame": 374,
-        "count": 1
+        "frame": 949,
+        "count": 2
       }
     ]
   },
   "incidents": [
     {
-      "timestamp": "2026-04-13T08:50:06.567948",
-      "frame": 250,
+      "timestamp": "2026-04-13T17:28:22.457699",
+      "frame": 162,
+      "type": "Near-Miss Collision",
+      "actor_1": "truck (ID:32)",
+      "actor_2": "car (ID:66)",
+      "distance_m": 2.01,
+      "ttc_s": 1.01,
+      "longitudinal_gap_m": 2.0,
+      "lateral_sep_m": 0.73,
+      "heading_delta_deg": 45.4,
+      "closing_speed_mps": 1.99,
+      "front_long_speed_mps": 2.89,
+      "back_long_speed_mps": 4.88,
+      "rear_front_pair": {
+        "front_vehicle_id": 66,
+        "back_vehicle_id": 32,
+        "rear_point_front_vehicle_m": [
+          26.034,
+          11.855
+        ],
+        "front_point_back_vehicle_m": [
+          26.178,
+          9.846
+        ]
+      },
+      "speed_diff_mps": 1.84,
+      "speed_diff_kmh": 6.6,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:26.819716",
+      "frame": 196,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:105)",
+      "actor_2": "car (ID:112)",
+      "distance_m": 2.44,
+      "ttc_s": 0.09,
+      "longitudinal_gap_m": 0.18,
+      "lateral_sep_m": 2.4,
+      "heading_delta_deg": 22.8,
+      "closing_speed_mps": 1.93,
+      "front_long_speed_mps": 3.8,
+      "back_long_speed_mps": 5.73,
+      "rear_front_pair": {
+        "front_vehicle_id": 112,
+        "back_vehicle_id": 105,
+        "rear_point_front_vehicle_m": [
+          21.581,
+          10.284
+        ],
+        "front_point_back_vehicle_m": [
+          24.009,
+          10.509
+        ]
+      },
+      "speed_diff_mps": 1.89,
+      "speed_diff_kmh": 6.8,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:33.006504",
+      "frame": 242,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:148)",
+      "actor_2": "car (ID:145)",
+      "distance_m": 1.76,
+      "ttc_s": 0.99,
+      "longitudinal_gap_m": 1.69,
+      "lateral_sep_m": 0.85,
+      "heading_delta_deg": 75.0,
+      "closing_speed_mps": 1.7,
+      "front_long_speed_mps": 1.74,
+      "back_long_speed_mps": 3.44,
+      "rear_front_pair": {
+        "front_vehicle_id": 145,
+        "back_vehicle_id": 148,
+        "rear_point_front_vehicle_m": [
+          9.674,
+          16.806
+        ],
+        "front_point_back_vehicle_m": [
+          9.759,
+          18.568
+        ]
+      },
+      "speed_diff_mps": 1.37,
+      "speed_diff_kmh": 4.9,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:36.086746",
+      "frame": 262,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:166)",
+      "actor_2": "car (ID:91)",
+      "distance_m": 9.5,
+      "ttc_s": 2.02,
+      "longitudinal_gap_m": 8.59,
+      "lateral_sep_m": 3.71,
+      "heading_delta_deg": 75.3,
+      "closing_speed_mps": 4.25,
+      "front_long_speed_mps": 1.37,
+      "back_long_speed_mps": 5.62,
+      "rear_front_pair": {
+        "front_vehicle_id": 91,
+        "back_vehicle_id": 166,
+        "rear_point_front_vehicle_m": [
+          21.554,
+          19.568
+        ],
+        "front_point_back_vehicle_m": [
+          24.073,
+          10.407
+        ]
+      },
+      "speed_diff_mps": 3.54,
+      "speed_diff_kmh": 12.7,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:36.086746",
+      "frame": 262,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:166)",
+      "actor_2": "car (ID:144)",
+      "distance_m": 4.54,
+      "ttc_s": 1.46,
+      "longitudinal_gap_m": 2.86,
+      "lateral_sep_m": 3.51,
+      "heading_delta_deg": 2.8,
+      "closing_speed_mps": 1.96,
+      "front_long_speed_mps": 4.01,
+      "back_long_speed_mps": 5.96,
+      "rear_front_pair": {
+        "front_vehicle_id": 144,
+        "back_vehicle_id": 166,
+        "rear_point_front_vehicle_m": [
+          26.997,
+          13.88
+        ],
+        "front_point_back_vehicle_m": [
+          24.073,
+          10.407
+        ]
+      },
+      "speed_diff_mps": 1.96,
+      "speed_diff_kmh": 7.0,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:39.962839",
+      "frame": 291,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:174)",
+      "actor_2": "car (ID:144)",
+      "distance_m": 7.58,
+      "ttc_s": 2.34,
+      "longitudinal_gap_m": 7.08,
+      "lateral_sep_m": 2.85,
+      "heading_delta_deg": 16.7,
+      "closing_speed_mps": 3.03,
+      "front_long_speed_mps": 2.89,
+      "back_long_speed_mps": 5.92,
+      "rear_front_pair": {
+        "front_vehicle_id": 144,
+        "back_vehicle_id": 174,
+        "rear_point_front_vehicle_m": [
+          26.729,
+          17.268
+        ],
+        "front_point_back_vehicle_m": [
+          24.132,
+          10.142
+        ]
+      },
+      "speed_diff_mps": 3.0,
+      "speed_diff_kmh": 10.8,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:39.962839",
+      "frame": 291,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:174)",
+      "actor_2": "car (ID:166)",
+      "distance_m": 3.26,
+      "ttc_s": 1.91,
+      "longitudinal_gap_m": 3.23,
+      "lateral_sep_m": 0.42,
+      "heading_delta_deg": 14.6,
+      "closing_speed_mps": 1.69,
+      "front_long_speed_mps": 4.23,
+      "back_long_speed_mps": 5.92,
+      "rear_front_pair": {
+        "front_vehicle_id": 166,
+        "back_vehicle_id": 174,
+        "rear_point_front_vehicle_m": [
+          24.494,
+          13.377
+        ],
+        "front_point_back_vehicle_m": [
+          24.132,
+          10.142
+        ]
+      },
+      "speed_diff_mps": 1.68,
+      "speed_diff_kmh": 6.0,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:40.366247",
+      "frame": 294,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:185)",
+      "actor_2": "car (ID:166)",
+      "distance_m": 6.54,
+      "ttc_s": 2.92,
+      "longitudinal_gap_m": 5.5,
+      "lateral_sep_m": 3.56,
+      "heading_delta_deg": 9.5,
+      "closing_speed_mps": 1.88,
+      "front_long_speed_mps": 3.81,
+      "back_long_speed_mps": 5.7,
+      "rear_front_pair": {
+        "front_vehicle_id": 166,
+        "back_vehicle_id": 185,
+        "rear_point_front_vehicle_m": [
+          24.566,
+          13.785
+        ],
+        "front_point_back_vehicle_m": [
+          21.498,
+          8.012
+        ]
+      },
+      "speed_diff_mps": 1.88,
+      "speed_diff_kmh": 6.8,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:40.366247",
+      "frame": 294,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:185)",
+      "actor_2": "car (ID:174)",
+      "distance_m": 2.85,
+      "ttc_s": 0.31,
+      "longitudinal_gap_m": 0.62,
+      "lateral_sep_m": 2.81,
+      "heading_delta_deg": 10.9,
+      "closing_speed_mps": 1.97,
+      "front_long_speed_mps": 3.72,
+      "back_long_speed_mps": 5.69,
+      "rear_front_pair": {
+        "front_vehicle_id": 174,
+        "back_vehicle_id": 185,
+        "rear_point_front_vehicle_m": [
+          24.231,
+          8.836
+        ],
+        "front_point_back_vehicle_m": [
+          21.498,
+          8.012
+        ]
+      },
+      "speed_diff_mps": 1.96,
+      "speed_diff_kmh": 7.1,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:28:40.805357",
+      "frame": 297,
       "type": "Hard Braking",
-      "actor_1": "truck (ID:44)",
+      "actor_1": "car (ID:127)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 4.12,
-      "acceleration_mps2": -4.63,
+      "speed_mps": 9.05,
+      "acceleration_mps2": -42.1,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:22.976740",
-      "frame": 371,
+      "timestamp": "2026-04-13T17:28:40.947195",
+      "frame": 298,
       "type": "Hard Braking",
-      "actor_1": "bus (ID:65)",
+      "actor_1": "car (ID:127)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 5.2,
-      "acceleration_mps2": -38.53,
+      "speed_mps": 8.25,
+      "acceleration_mps2": -33.23,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:23.236898",
-      "frame": 372,
+      "timestamp": "2026-04-13T17:28:41.132873",
+      "frame": 299,
       "type": "Hard Braking",
-      "actor_1": "bus (ID:65)",
+      "actor_1": "car (ID:127)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 4.03,
-      "acceleration_mps2": -32.45,
+      "speed_mps": 7.0,
+      "acceleration_mps2": -32.47,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:23.498763",
-      "frame": 373,
+      "timestamp": "2026-04-13T17:28:41.878184",
+      "frame": 303,
       "type": "Hard Braking",
-      "actor_1": "bus (ID:65)",
+      "actor_1": "truck (ID:122)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 5.59,
-      "acceleration_mps2": -6.96,
+      "speed_mps": 14.77,
+      "acceleration_mps2": -45.35,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:23.613758",
-      "frame": 374,
+      "timestamp": "2026-04-13T17:28:42.209809",
+      "frame": 304,
       "type": "Hard Braking",
-      "actor_1": "bus (ID:65)",
+      "actor_1": "truck (ID:122)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 4.26,
-      "acceleration_mps2": -14.86,
+      "speed_mps": 10.3,
+      "acceleration_mps2": -71.99,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:24.065007",
-      "frame": 378,
+      "timestamp": "2026-04-13T17:28:42.405407",
+      "frame": 305,
       "type": "Hard Braking",
-      "actor_1": "bus (ID:65)",
+      "actor_1": "truck (ID:122)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 5.45,
-      "acceleration_mps2": -20.34,
+      "speed_mps": 6.91,
+      "acceleration_mps2": -77.03,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:30.907287",
-      "frame": 447,
-      "type": "Hard Braking",
-      "actor_1": "car (ID:77)",
-      "actor_2": null,
-      "distance_m": null,
-      "ttc_s": null,
-      "speed_mps": 5.52,
-      "acceleration_mps2": -18.34,
+      "timestamp": "2026-04-13T17:28:58.437264",
+      "frame": 422,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:255)",
+      "actor_2": "car (ID:232)",
+      "distance_m": 3.67,
+      "ttc_s": 0.85,
+      "longitudinal_gap_m": 2.94,
+      "lateral_sep_m": 2.17,
+      "heading_delta_deg": 9.6,
+      "closing_speed_mps": 3.45,
+      "front_long_speed_mps": 4.53,
+      "back_long_speed_mps": 7.99,
+      "rear_front_pair": {
+        "front_vehicle_id": 232,
+        "back_vehicle_id": 255,
+        "rear_point_front_vehicle_m": [
+          22.102,
+          13.152
+        ],
+        "front_point_back_vehicle_m": [
+          24.448,
+          10.328
+        ]
+      },
+      "speed_diff_mps": 3.44,
+      "speed_diff_kmh": 12.4,
+      "probability_level": 5,
+      "severity_level": 2,
+      "composite_score": 10,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:31.037253",
-      "frame": 448,
+      "timestamp": "2026-04-13T17:29:32.554393",
+      "frame": 657,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:402)",
+      "actor_2": "car (ID:385)",
+      "distance_m": 3.82,
+      "ttc_s": 1.13,
+      "longitudinal_gap_m": 1.96,
+      "lateral_sep_m": 3.24,
+      "heading_delta_deg": 13.8,
+      "closing_speed_mps": 1.73,
+      "front_long_speed_mps": 4.36,
+      "back_long_speed_mps": 6.09,
+      "rear_front_pair": {
+        "front_vehicle_id": 385,
+        "back_vehicle_id": 402,
+        "rear_point_front_vehicle_m": [
+          24.456,
+          12.424
+        ],
+        "front_point_back_vehicle_m": [
+          21.288,
+          10.295
+        ]
+      },
+      "speed_diff_mps": 1.72,
+      "speed_diff_kmh": 6.2,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:29:36.192828",
+      "frame": 686,
       "type": "Hard Braking",
-      "actor_1": "car (ID:77)",
+      "actor_1": "car (ID:312)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 5.91,
-      "acceleration_mps2": -7.83,
+      "speed_mps": 6.36,
+      "acceleration_mps2": -5.49,
       "risk": "Medium"
     },
     {
-      "timestamp": "2026-04-13T08:50:31.251376",
-      "frame": 449,
+      "timestamp": "2026-04-13T17:29:48.855934",
+      "frame": 770,
       "type": "Hard Braking",
-      "actor_1": "car (ID:77)",
+      "actor_1": "car (ID:477)",
       "actor_2": null,
       "distance_m": null,
       "ttc_s": null,
-      "speed_mps": 5.3,
-      "acceleration_mps2": -9.63,
+      "speed_mps": 7.36,
+      "acceleration_mps2": -11.95,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:00.614659",
+      "frame": 853,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:514)",
+      "actor_2": "car (ID:497)",
+      "distance_m": 2.69,
+      "ttc_s": 1.16,
+      "longitudinal_gap_m": 2.57,
+      "lateral_sep_m": 0.89,
+      "heading_delta_deg": 31.8,
+      "closing_speed_mps": 2.22,
+      "front_long_speed_mps": 3.43,
+      "back_long_speed_mps": 5.65,
+      "rear_front_pair": {
+        "front_vehicle_id": 497,
+        "back_vehicle_id": 514,
+        "rear_point_front_vehicle_m": [
+          21.637,
+          13.829
+        ],
+        "front_point_back_vehicle_m": [
+          21.229,
+          11.174
+        ]
+      },
+      "speed_diff_mps": 2.14,
+      "speed_diff_kmh": 7.7,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:10.061580",
+      "frame": 916,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:551)",
+      "actor_2": "car (ID:503)",
+      "distance_m": 4.15,
+      "ttc_s": 0.85,
+      "longitudinal_gap_m": 3.17,
+      "lateral_sep_m": 2.82,
+      "heading_delta_deg": 20.6,
+      "closing_speed_mps": 3.75,
+      "front_long_speed_mps": 2.02,
+      "back_long_speed_mps": 5.76,
+      "rear_front_pair": {
+        "front_vehicle_id": 503,
+        "back_vehicle_id": 551,
+        "rear_point_front_vehicle_m": [
+          26.898,
+          12.802
+        ],
+        "front_point_back_vehicle_m": [
+          24.311,
+          9.553
+        ]
+      },
+      "speed_diff_mps": 3.7,
+      "speed_diff_kmh": 13.3,
+      "probability_level": 5,
+      "severity_level": 2,
+      "composite_score": 10,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:15.320973",
+      "frame": 949,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:574)",
+      "actor_2": "car (ID:551)",
+      "distance_m": 5.24,
+      "ttc_s": 1.62,
+      "longitudinal_gap_m": 5.19,
+      "lateral_sep_m": 0.76,
+      "heading_delta_deg": 6.5,
+      "closing_speed_mps": 3.2,
+      "front_long_speed_mps": 3.82,
+      "back_long_speed_mps": 7.03,
+      "rear_front_pair": {
+        "front_vehicle_id": 551,
+        "back_vehicle_id": 574,
+        "rear_point_front_vehicle_m": [
+          24.458,
+          12.998
+        ],
+        "front_point_back_vehicle_m": [
+          24.194,
+          7.76
+        ]
+      },
+      "speed_diff_mps": 3.2,
+      "speed_diff_kmh": 11.5,
+      "probability_level": 4,
+      "severity_level": 2,
+      "composite_score": 8,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:15.320973",
+      "frame": 949,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:574)",
+      "actor_2": "car (ID:530)",
+      "distance_m": 6.04,
+      "ttc_s": 2.92,
+      "longitudinal_gap_m": 5.9,
+      "lateral_sep_m": 1.29,
+      "heading_delta_deg": 0.3,
+      "closing_speed_mps": 2.02,
+      "front_long_speed_mps": 5.01,
+      "back_long_speed_mps": 7.03,
+      "rear_front_pair": {
+        "front_vehicle_id": 530,
+        "back_vehicle_id": 574,
+        "rear_point_front_vehicle_m": [
+          22.142,
+          13.436
+        ],
+        "front_point_back_vehicle_m": [
+          24.194,
+          7.76
+        ]
+      },
+      "speed_diff_mps": 2.02,
+      "speed_diff_kmh": 7.3,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:26.687772",
+      "frame": 1026,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:606)",
+      "actor_2": "car (ID:574)",
+      "distance_m": 8.91,
+      "ttc_s": 2.21,
+      "longitudinal_gap_m": 8.28,
+      "lateral_sep_m": 3.37,
+      "heading_delta_deg": 9.9,
+      "closing_speed_mps": 3.75,
+      "front_long_speed_mps": 3.17,
+      "back_long_speed_mps": 6.93,
+      "rear_front_pair": {
+        "front_vehicle_id": 574,
+        "back_vehicle_id": 606,
+        "rear_point_front_vehicle_m": [
+          24.508,
+          16.078
+        ],
+        "front_point_back_vehicle_m": [
+          21.46,
+          7.701
+        ]
+      },
+      "speed_diff_mps": 3.74,
+      "speed_diff_kmh": 13.5,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:26.687772",
+      "frame": 1026,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:606)",
+      "actor_2": "car (ID:592)",
+      "distance_m": 5.41,
+      "ttc_s": 2.24,
+      "longitudinal_gap_m": 5.41,
+      "lateral_sep_m": 0.23,
+      "heading_delta_deg": 8.8,
+      "closing_speed_mps": 2.41,
+      "front_long_speed_mps": 4.51,
+      "back_long_speed_mps": 6.92,
+      "rear_front_pair": {
+        "front_vehicle_id": 592,
+        "back_vehicle_id": 606,
+        "rear_point_front_vehicle_m": [
+          21.55,
+          13.111
+        ],
+        "front_point_back_vehicle_m": [
+          21.46,
+          7.701
+        ]
+      },
+      "speed_diff_mps": 2.4,
+      "speed_diff_kmh": 8.7,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:33.654905",
+      "frame": 1083,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:630)",
+      "actor_2": "car (ID:612)",
+      "distance_m": 3.99,
+      "ttc_s": 1.27,
+      "longitudinal_gap_m": 2.95,
+      "lateral_sep_m": 2.73,
+      "heading_delta_deg": 11.8,
+      "closing_speed_mps": 2.33,
+      "front_long_speed_mps": 3.58,
+      "back_long_speed_mps": 5.91,
+      "rear_front_pair": {
+        "front_vehicle_id": 612,
+        "back_vehicle_id": 630,
+        "rear_point_front_vehicle_m": [
+          24.493,
+          14.407
+        ],
+        "front_point_back_vehicle_m": [
+          21.66,
+          11.603
+        ]
+      },
+      "speed_diff_mps": 2.32,
+      "speed_diff_kmh": 8.3,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:38.443143",
+      "frame": 1119,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:651)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 8.23,
+      "acceleration_mps2": -51.89,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:40.940394",
+      "frame": 1138,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:533)",
+      "actor_2": "car (ID:635)",
+      "distance_m": 4.41,
+      "ttc_s": 1.13,
+      "longitudinal_gap_m": 4.39,
+      "lateral_sep_m": 0.69,
+      "heading_delta_deg": 29.6,
+      "closing_speed_mps": 3.89,
+      "front_long_speed_mps": 3.21,
+      "back_long_speed_mps": 7.1,
+      "rear_front_pair": {
+        "front_vehicle_id": 635,
+        "back_vehicle_id": 533,
+        "rear_point_front_vehicle_m": [
+          24.385,
+          14.591
+        ],
+        "front_point_back_vehicle_m": [
+          24.194,
+          10.181
+        ]
+      },
+      "speed_diff_mps": 3.78,
+      "speed_diff_kmh": 13.6,
+      "probability_level": 4,
+      "severity_level": 2,
+      "composite_score": 8,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:40.940394",
+      "frame": 1138,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:533)",
+      "actor_2": "car (ID:630)",
+      "distance_m": 9.16,
+      "ttc_s": 2.29,
+      "longitudinal_gap_m": 8.95,
+      "lateral_sep_m": 1.73,
+      "heading_delta_deg": 32.9,
+      "closing_speed_mps": 3.91,
+      "front_long_speed_mps": 3.16,
+      "back_long_speed_mps": 7.08,
+      "rear_front_pair": {
+        "front_vehicle_id": 630,
+        "back_vehicle_id": 533,
+        "rear_point_front_vehicle_m": [
+          21.796,
+          19.018
+        ],
+        "front_point_back_vehicle_m": [
+          24.194,
+          10.181
+        ]
+      },
+      "speed_diff_mps": 3.78,
+      "speed_diff_kmh": 13.6,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:40.940394",
+      "frame": 1138,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:533)",
+      "actor_2": "car (ID:654)",
+      "distance_m": 2.75,
+      "ttc_s": 0.28,
+      "longitudinal_gap_m": 1.03,
+      "lateral_sep_m": 2.45,
+      "heading_delta_deg": 16.4,
+      "closing_speed_mps": 3.73,
+      "front_long_speed_mps": 3.43,
+      "back_long_speed_mps": 7.17,
+      "rear_front_pair": {
+        "front_vehicle_id": 654,
+        "back_vehicle_id": 533,
+        "rear_point_front_vehicle_m": [
+          21.523,
+          10.842
+        ],
+        "front_point_back_vehicle_m": [
+          24.194,
+          10.181
+        ]
+      },
+      "speed_diff_mps": 3.7,
+      "speed_diff_kmh": 13.3,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:30:48.995073",
+      "frame": 1188,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:712)",
+      "actor_2": "car (ID:685)",
+      "distance_m": 6.07,
+      "ttc_s": 2.22,
+      "longitudinal_gap_m": 5.39,
+      "lateral_sep_m": 2.79,
+      "heading_delta_deg": 0.4,
+      "closing_speed_mps": 2.43,
+      "front_long_speed_mps": 3.26,
+      "back_long_speed_mps": 5.69,
+      "rear_front_pair": {
+        "front_vehicle_id": 685,
+        "back_vehicle_id": 712,
+        "rear_point_front_vehicle_m": [
+          27.252,
+          15.807
+        ],
+        "front_point_back_vehicle_m": [
+          24.671,
+          10.313
+        ]
+      },
+      "speed_diff_mps": 2.43,
+      "speed_diff_kmh": 8.8,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:05.504656",
+      "frame": 1312,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:747)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.94,
+      "acceleration_mps2": -31.8,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:07.367899",
+      "frame": 1326,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:778)",
+      "actor_2": "car (ID:767)",
+      "distance_m": 8.07,
+      "ttc_s": 2.82,
+      "longitudinal_gap_m": 7.68,
+      "lateral_sep_m": 2.52,
+      "heading_delta_deg": 11.5,
+      "closing_speed_mps": 2.72,
+      "front_long_speed_mps": 3.4,
+      "back_long_speed_mps": 6.12,
+      "rear_front_pair": {
+        "front_vehicle_id": 767,
+        "back_vehicle_id": 778,
+        "rear_point_front_vehicle_m": [
+          23.723,
+          14.833
+        ],
+        "front_point_back_vehicle_m": [
+          21.389,
+          7.105
+        ]
+      },
+      "speed_diff_mps": 2.71,
+      "speed_diff_kmh": 9.7,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:14.304788",
+      "frame": 1374,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:778)",
+      "actor_2": "car (ID:798)",
+      "distance_m": 1.33,
+      "ttc_s": 0.29,
+      "longitudinal_gap_m": 1.31,
+      "lateral_sep_m": 0.07,
+      "heading_delta_deg": 17.9,
+      "closing_speed_mps": 4.58,
+      "front_long_speed_mps": 2.42,
+      "back_long_speed_mps": 7.0,
+      "rear_front_pair": {
+        "front_vehicle_id": 798,
+        "back_vehicle_id": 778,
+        "rear_point_front_vehicle_m": [
+          21.907,
+          11.739
+        ],
+        "front_point_back_vehicle_m": [
+          21.816,
+          10.413
+        ]
+      },
+      "speed_diff_mps": 4.54,
+      "speed_diff_kmh": 16.3,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:30.008702",
+      "frame": 1487,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:863)",
+      "actor_2": "car (ID:851)",
+      "distance_m": 5.32,
+      "ttc_s": 2.82,
+      "longitudinal_gap_m": 5.31,
+      "lateral_sep_m": 0.29,
+      "heading_delta_deg": 0.3,
+      "closing_speed_mps": 1.89,
+      "front_long_speed_mps": 3.23,
+      "back_long_speed_mps": 5.12,
+      "rear_front_pair": {
+        "front_vehicle_id": 851,
+        "back_vehicle_id": 863,
+        "rear_point_front_vehicle_m": [
+          22.292,
+          13.499
+        ],
+        "front_point_back_vehicle_m": [
+          21.628,
+          8.219
+        ]
+      },
+      "speed_diff_mps": 1.89,
+      "speed_diff_kmh": 6.8,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:32.148533",
+      "frame": 1503,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:881)",
+      "actor_2": "car (ID:851)",
+      "distance_m": 5.99,
+      "ttc_s": 2.21,
+      "longitudinal_gap_m": 5.81,
+      "lateral_sep_m": 1.4,
+      "heading_delta_deg": 15.6,
+      "closing_speed_mps": 2.63,
+      "front_long_speed_mps": 3.34,
+      "back_long_speed_mps": 5.96,
+      "rear_front_pair": {
+        "front_vehicle_id": 851,
+        "back_vehicle_id": 881,
+        "rear_point_front_vehicle_m": [
+          22.454,
+          15.746
+        ],
+        "front_point_back_vehicle_m": [
+          24.388,
+          10.079
+        ]
+      },
+      "speed_diff_mps": 2.6,
+      "speed_diff_kmh": 9.4,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:32.298309",
+      "frame": 1504,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:881)",
+      "actor_2": "car (ID:879)",
+      "distance_m": 4.61,
+      "ttc_s": 2.59,
+      "longitudinal_gap_m": 4.58,
+      "lateral_sep_m": 0.51,
+      "heading_delta_deg": 24.5,
+      "closing_speed_mps": 1.77,
+      "front_long_speed_mps": 3.0,
+      "back_long_speed_mps": 4.77,
+      "rear_front_pair": {
+        "front_vehicle_id": 879,
+        "back_vehicle_id": 881,
+        "rear_point_front_vehicle_m": [
+          24.218,
+          14.822
+        ],
+        "front_point_back_vehicle_m": [
+          24.472,
+          10.219
+        ]
+      },
+      "speed_diff_mps": 1.73,
+      "speed_diff_kmh": 6.2,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:33.434660",
+      "frame": 1512,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:894)",
+      "actor_2": "car (ID:851)",
+      "distance_m": 6.21,
+      "ttc_s": 0.76,
+      "longitudinal_gap_m": 5.52,
+      "lateral_sep_m": 3.2,
+      "heading_delta_deg": 45.3,
+      "closing_speed_mps": 7.23,
+      "front_long_speed_mps": 3.33,
+      "back_long_speed_mps": 10.56,
+      "rear_front_pair": {
+        "front_vehicle_id": 851,
+        "back_vehicle_id": 894,
+        "rear_point_front_vehicle_m": [
+          22.632,
+          17.022
+        ],
+        "front_point_back_vehicle_m": [
+          23.958,
+          10.953
+        ]
+      },
+      "speed_diff_mps": 6.79,
+      "speed_diff_kmh": 24.4,
+      "probability_level": 5,
+      "severity_level": 2,
+      "composite_score": 10,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:33.434660",
+      "frame": 1512,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:894)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 10.79,
+      "acceleration_mps2": -11.27,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:33.567089",
+      "frame": 1513,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:894)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 8.14,
+      "acceleration_mps2": -33.29,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:31:34.194732",
+      "frame": 1518,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:894)",
+      "actor_2": "car (ID:879)",
+      "distance_m": 4.27,
+      "ttc_s": 2.29,
+      "longitudinal_gap_m": 4.27,
+      "lateral_sep_m": 0.15,
+      "heading_delta_deg": 14.3,
+      "closing_speed_mps": 1.86,
+      "front_long_speed_mps": 3.11,
+      "back_long_speed_mps": 4.97,
+      "rear_front_pair": {
+        "front_vehicle_id": 879,
+        "back_vehicle_id": 894,
+        "rear_point_front_vehicle_m": [
+          24.482,
+          16.637
+        ],
+        "front_point_back_vehicle_m": [
+          24.52,
+          12.369
+        ]
+      },
+      "speed_diff_mps": 1.85,
+      "speed_diff_kmh": 6.7,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:05.395922",
+      "frame": 1774,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1037)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.27,
+      "acceleration_mps2": -6.71,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:11.253221",
+      "frame": 1826,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1043)",
+      "actor_2": "car (ID:1037)",
+      "distance_m": 11.46,
+      "ttc_s": 2.31,
+      "longitudinal_gap_m": 11.4,
+      "lateral_sep_m": 1.2,
+      "heading_delta_deg": 7.6,
+      "closing_speed_mps": 4.94,
+      "front_long_speed_mps": 4.91,
+      "back_long_speed_mps": 9.85,
+      "rear_front_pair": {
+        "front_vehicle_id": 1037,
+        "back_vehicle_id": 1043,
+        "rear_point_front_vehicle_m": [
+          22.089,
+          15.236
+        ],
+        "front_point_back_vehicle_m": [
+          21.378,
+          3.798
+        ]
+      },
+      "speed_diff_mps": 4.93,
+      "speed_diff_kmh": 17.8,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:14.615832",
+      "frame": 1850,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1043)",
+      "actor_2": "car (ID:1037)",
+      "distance_m": 11.24,
+      "ttc_s": 2.7,
+      "longitudinal_gap_m": 10.88,
+      "lateral_sep_m": 2.85,
+      "heading_delta_deg": 83.8,
+      "closing_speed_mps": 4.03,
+      "front_long_speed_mps": 1.83,
+      "back_long_speed_mps": 5.86,
+      "rear_front_pair": {
+        "front_vehicle_id": 1037,
+        "back_vehicle_id": 1043,
+        "rear_point_front_vehicle_m": [
+          22.324,
+          19.785
+        ],
+        "front_point_back_vehicle_m": [
+          21.086,
+          8.615
+        ]
+      },
+      "speed_diff_mps": 3.11,
+      "speed_diff_kmh": 11.2,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:16.553557",
+      "frame": 1866,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1072)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 10.39,
+      "acceleration_mps2": -74.97,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:17.393362",
+      "frame": 1873,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1072)",
+      "actor_2": "car (ID:1056)",
+      "distance_m": 3.72,
+      "ttc_s": 0.81,
+      "longitudinal_gap_m": 2.19,
+      "lateral_sep_m": 3.06,
+      "heading_delta_deg": 26.4,
+      "closing_speed_mps": 2.7,
+      "front_long_speed_mps": 3.74,
+      "back_long_speed_mps": 6.43,
+      "rear_front_pair": {
+        "front_vehicle_id": 1056,
+        "back_vehicle_id": 1072,
+        "rear_point_front_vehicle_m": [
+          24.403,
+          10.5
+        ],
+        "front_point_back_vehicle_m": [
+          21.303,
+          8.444
+        ]
+      },
+      "speed_diff_mps": 2.63,
+      "speed_diff_kmh": 9.5,
+      "probability_level": 5,
+      "severity_level": 1,
+      "composite_score": 5,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:21.383697",
+      "frame": 1904,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1072)",
+      "actor_2": "car (ID:1056)",
+      "distance_m": 2.97,
+      "ttc_s": 0.51,
+      "longitudinal_gap_m": 1.17,
+      "lateral_sep_m": 2.74,
+      "heading_delta_deg": 0.4,
+      "closing_speed_mps": 2.28,
+      "front_long_speed_mps": 3.91,
+      "back_long_speed_mps": 6.19,
+      "rear_front_pair": {
+        "front_vehicle_id": 1056,
+        "back_vehicle_id": 1072,
+        "rear_point_front_vehicle_m": [
+          24.869,
+          15.41
+        ],
+        "front_point_back_vehicle_m": [
+          22.066,
+          14.418
+        ]
+      },
+      "speed_diff_mps": 2.28,
+      "speed_diff_kmh": 8.2,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:21.876992",
+      "frame": 1908,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1109)",
+      "actor_2": "car (ID:1072)",
+      "distance_m": 1.58,
+      "ttc_s": 1.03,
+      "longitudinal_gap_m": 1.57,
+      "lateral_sep_m": 0.24,
+      "heading_delta_deg": 1.7,
+      "closing_speed_mps": 1.52,
+      "front_long_speed_mps": 4.52,
+      "back_long_speed_mps": 6.04,
+      "rear_front_pair": {
+        "front_vehicle_id": 1072,
+        "back_vehicle_id": 1109,
+        "rear_point_front_vehicle_m": [
+          22.003,
+          12.85
+        ],
+        "front_point_back_vehicle_m": [
+          21.743,
+          11.288
+        ]
+      },
+      "speed_diff_mps": 1.52,
+      "speed_diff_kmh": 5.5,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:36.671014",
+      "frame": 2020,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1041)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.59,
+      "acceleration_mps2": -50.78,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:41.209524",
+      "frame": 2051,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1190)",
+      "actor_2": "car (ID:1167)",
+      "distance_m": 2.45,
+      "ttc_s": 1.35,
+      "longitudinal_gap_m": 2.22,
+      "lateral_sep_m": 1.05,
+      "heading_delta_deg": 7.7,
+      "closing_speed_mps": 1.64,
+      "front_long_speed_mps": 4.35,
+      "back_long_speed_mps": 5.99,
+      "rear_front_pair": {
+        "front_vehicle_id": 1167,
+        "back_vehicle_id": 1190,
+        "rear_point_front_vehicle_m": [
+          22.51,
+          13.931
+        ],
+        "front_point_back_vehicle_m": [
+          21.593,
+          11.661
+        ]
+      },
+      "speed_diff_mps": 1.63,
+      "speed_diff_kmh": 5.9,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:32:50.179761",
+      "frame": 2113,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1222)",
+      "actor_2": "car (ID:1214)",
+      "distance_m": 2.74,
+      "ttc_s": 0.39,
+      "longitudinal_gap_m": 2.38,
+      "lateral_sep_m": 1.46,
+      "heading_delta_deg": 16.7,
+      "closing_speed_mps": 6.14,
+      "front_long_speed_mps": 3.69,
+      "back_long_speed_mps": 9.83,
+      "rear_front_pair": {
+        "front_vehicle_id": 1214,
+        "back_vehicle_id": 1222,
+        "rear_point_front_vehicle_m": [
+          24.462,
+          12.034
+        ],
+        "front_point_back_vehicle_m": [
+          23.454,
+          9.482
+        ]
+      },
+      "speed_diff_mps": 6.09,
+      "speed_diff_kmh": 21.9,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:12.112922",
+      "frame": 2283,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1289)",
+      "actor_2": "car (ID:1288)",
+      "distance_m": 3.1,
+      "ttc_s": 0.9,
+      "longitudinal_gap_m": 1.85,
+      "lateral_sep_m": 2.52,
+      "heading_delta_deg": 10.2,
+      "closing_speed_mps": 2.05,
+      "front_long_speed_mps": 3.82,
+      "back_long_speed_mps": 5.87,
+      "rear_front_pair": {
+        "front_vehicle_id": 1288,
+        "back_vehicle_id": 1289,
+        "rear_point_front_vehicle_m": [
+          27.059,
+          15.338
+        ],
+        "front_point_back_vehicle_m": [
+          24.647,
+          13.384
+        ]
+      },
+      "speed_diff_mps": 2.04,
+      "speed_diff_kmh": 7.3,
+      "probability_level": 5,
+      "severity_level": 1,
+      "composite_score": 5,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:15.079287",
+      "frame": 2307,
+      "type": "Near-Miss Collision",
+      "actor_1": "truck (ID:1296)",
+      "actor_2": "car (ID:1288)",
+      "distance_m": 5.42,
+      "ttc_s": 2.71,
+      "longitudinal_gap_m": 4.4,
+      "lateral_sep_m": 3.38,
+      "heading_delta_deg": 19.3,
+      "closing_speed_mps": 1.63,
+      "front_long_speed_mps": 4.22,
+      "back_long_speed_mps": 5.84,
+      "rear_front_pair": {
+        "front_vehicle_id": 1288,
+        "back_vehicle_id": 1296,
+        "rear_point_front_vehicle_m": [
+          27.524,
+          18.735
+        ],
+        "front_point_back_vehicle_m": [
+          26.354,
+          13.438
+        ]
+      },
+      "speed_diff_mps": 1.6,
+      "speed_diff_kmh": 5.8,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:19.089380",
+      "frame": 2339,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1312)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 10.22,
+      "acceleration_mps2": -19.52,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:19.298941",
+      "frame": 2340,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1312)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.45,
+      "acceleration_mps2": -39.39,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:29.674629",
+      "frame": 2422,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1363)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.55,
+      "acceleration_mps2": -16.77,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:57.177000",
+      "frame": 2648,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1505)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 17.8,
+      "acceleration_mps2": -8.0,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:33:57.304719",
+      "frame": 2649,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1505)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 9.79,
+      "acceleration_mps2": -84.92,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:05.527281",
+      "frame": 2714,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1530)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.3,
+      "acceleration_mps2": -30.11,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:05.671733",
+      "frame": 2715,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1530)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.31,
+      "acceleration_mps2": -17.99,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:11.442547",
+      "frame": 2762,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1541)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 13.04,
+      "acceleration_mps2": -17.18,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:11.581178",
+      "frame": 2763,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1541)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.8,
+      "acceleration_mps2": -62.74,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:14.363495",
+      "frame": 2786,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1544)",
+      "actor_2": "car (ID:1560)",
+      "distance_m": 3.37,
+      "ttc_s": 1.5,
+      "longitudinal_gap_m": 2.46,
+      "lateral_sep_m": 2.32,
+      "heading_delta_deg": 15.4,
+      "closing_speed_mps": 1.64,
+      "front_long_speed_mps": 2.88,
+      "back_long_speed_mps": 4.52,
+      "rear_front_pair": {
+        "front_vehicle_id": 1560,
+        "back_vehicle_id": 1544,
+        "rear_point_front_vehicle_m": [
+          27.009,
+          11.765
+        ],
+        "front_point_back_vehicle_m": [
+          24.31,
+          9.739
+        ]
+      },
+      "speed_diff_mps": 1.62,
+      "speed_diff_kmh": 5.8,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:22.196486",
+      "frame": 2847,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:1618)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 9.04,
+      "acceleration_mps2": -31.73,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:22.327598",
+      "frame": 2848,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:1618)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.27,
+      "acceleration_mps2": -36.75,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:26.941359",
+      "frame": 2884,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1641)",
+      "actor_2": "car (ID:1625)",
+      "distance_m": 3.37,
+      "ttc_s": 1.15,
+      "longitudinal_gap_m": 1.96,
+      "lateral_sep_m": 2.75,
+      "heading_delta_deg": 0.7,
+      "closing_speed_mps": 1.7,
+      "front_long_speed_mps": 3.72,
+      "back_long_speed_mps": 5.42,
+      "rear_front_pair": {
+        "front_vehicle_id": 1625,
+        "back_vehicle_id": 1641,
+        "rear_point_front_vehicle_m": [
+          24.846,
+          13.569
+        ],
+        "front_point_back_vehicle_m": [
+          22.036,
+          11.704
+        ]
+      },
+      "speed_diff_mps": 1.7,
+      "speed_diff_kmh": 6.1,
+      "probability_level": 4,
+      "severity_level": 1,
+      "composite_score": 4,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:31.371570",
+      "frame": 2921,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:1541)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.52,
+      "acceleration_mps2": -18.39,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:34:40.443836",
+      "frame": 3003,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1683)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 9.24,
+      "acceleration_mps2": -42.18,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:02.294492",
+      "frame": 3186,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1771)",
+      "actor_2": "car (ID:1750)",
+      "distance_m": 11.29,
+      "ttc_s": 2.48,
+      "longitudinal_gap_m": 10.68,
+      "lateral_sep_m": 3.69,
+      "heading_delta_deg": 8.6,
+      "closing_speed_mps": 4.31,
+      "front_long_speed_mps": 3.8,
+      "back_long_speed_mps": 8.11,
+      "rear_front_pair": {
+        "front_vehicle_id": 1750,
+        "back_vehicle_id": 1771,
+        "rear_point_front_vehicle_m": [
+          24.595,
+          15.011
+        ],
+        "front_point_back_vehicle_m": [
+          21.974,
+          4.03
+        ]
+      },
+      "speed_diff_mps": 4.3,
+      "speed_diff_kmh": 15.5,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:05.900774",
+      "frame": 3214,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1794)",
+      "actor_2": "car (ID:1777)",
+      "distance_m": 2.18,
+      "ttc_s": 0.27,
+      "longitudinal_gap_m": 1.19,
+      "lateral_sep_m": 1.91,
+      "heading_delta_deg": 13.7,
+      "closing_speed_mps": 4.49,
+      "front_long_speed_mps": 2.73,
+      "back_long_speed_mps": 7.21,
+      "rear_front_pair": {
+        "front_vehicle_id": 1777,
+        "back_vehicle_id": 1794,
+        "rear_point_front_vehicle_m": [
+          26.363,
+          11.912
+        ],
+        "front_point_back_vehicle_m": [
+          24.433,
+          10.891
+        ]
+      },
+      "speed_diff_mps": 4.46,
+      "speed_diff_kmh": 16.1,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:06.334176",
+      "frame": 3217,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1794)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.57,
+      "acceleration_mps2": -5.94,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:06.901121",
+      "frame": 3221,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1771)",
+      "actor_2": "car (ID:1794)",
+      "distance_m": 2.02,
+      "ttc_s": 0.12,
+      "longitudinal_gap_m": 0.58,
+      "lateral_sep_m": 2.11,
+      "heading_delta_deg": 32.6,
+      "closing_speed_mps": 4.88,
+      "front_long_speed_mps": 2.32,
+      "back_long_speed_mps": 7.2,
+      "rear_front_pair": {
+        "front_vehicle_id": 1794,
+        "back_vehicle_id": 1771,
+        "rear_point_front_vehicle_m": [
+          24.009,
+          10.073
+        ],
+        "front_point_back_vehicle_m": [
+          22.068,
+          9.513
+        ]
+      },
+      "speed_diff_mps": 4.73,
+      "speed_diff_kmh": 17.0,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:07.612424",
+      "frame": 3226,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1754)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.23,
+      "acceleration_mps2": -14.74,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:08.958836",
+      "frame": 3236,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:1805)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 7.93,
+      "acceleration_mps2": -43.97,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:14.755666",
+      "frame": 3281,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1804)",
+      "actor_2": "car (ID:1771)",
+      "distance_m": 1.9,
+      "ttc_s": 0.31,
+      "longitudinal_gap_m": 0.77,
+      "lateral_sep_m": 1.64,
+      "heading_delta_deg": 17.6,
+      "closing_speed_mps": 2.49,
+      "front_long_speed_mps": 4.02,
+      "back_long_speed_mps": 6.51,
+      "rear_front_pair": {
+        "front_vehicle_id": 1771,
+        "back_vehicle_id": 1804,
+        "rear_point_front_vehicle_m": [
+          22.327,
+          17.387
+        ],
+        "front_point_back_vehicle_m": [
+          24.148,
+          16.857
+        ]
+      },
+      "speed_diff_mps": 2.46,
+      "speed_diff_kmh": 8.9,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:15.284426",
+      "frame": 3285,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:1771)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.97,
+      "acceleration_mps2": -55.21,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:32.401369",
+      "frame": 3424,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1887)",
+      "actor_2": "car (ID:1880)",
+      "distance_m": 2.92,
+      "ttc_s": 0.83,
+      "longitudinal_gap_m": 1.28,
+      "lateral_sep_m": 2.63,
+      "heading_delta_deg": 4.5,
+      "closing_speed_mps": 1.53,
+      "front_long_speed_mps": 3.64,
+      "back_long_speed_mps": 5.18,
+      "rear_front_pair": {
+        "front_vehicle_id": 1880,
+        "back_vehicle_id": 1887,
+        "rear_point_front_vehicle_m": [
+          26.974,
+          12.833
+        ],
+        "front_point_back_vehicle_m": [
+          24.432,
+          11.406
+        ]
+      },
+      "speed_diff_mps": 1.53,
+      "speed_diff_kmh": 5.5,
+      "probability_level": 5,
+      "severity_level": 3,
+      "composite_score": 15,
+      "risk": "High"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:35.202994",
+      "frame": 3445,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1916)",
+      "actor_2": "car (ID:1880)",
+      "distance_m": 8.38,
+      "ttc_s": 2.92,
+      "longitudinal_gap_m": 8.37,
+      "lateral_sep_m": 0.53,
+      "heading_delta_deg": 10.5,
+      "closing_speed_mps": 2.86,
+      "front_long_speed_mps": 3.04,
+      "back_long_speed_mps": 5.91,
+      "rear_front_pair": {
+        "front_vehicle_id": 1880,
+        "back_vehicle_id": 1916,
+        "rear_point_front_vehicle_m": [
+          26.596,
+          15.764
+        ],
+        "front_point_back_vehicle_m": [
+          24.304,
+          7.703
+        ]
+      },
+      "speed_diff_mps": 2.85,
+      "speed_diff_kmh": 10.3,
+      "probability_level": 3,
+      "severity_level": 2,
+      "composite_score": 6,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:35.202994",
+      "frame": 3445,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1916)",
+      "actor_2": "car (ID:1887)",
+      "distance_m": 5.2,
+      "ttc_s": 1.99,
+      "longitudinal_gap_m": 5.11,
+      "lateral_sep_m": 0.95,
+      "heading_delta_deg": 7.5,
+      "closing_speed_mps": 2.57,
+      "front_long_speed_mps": 3.35,
+      "back_long_speed_mps": 5.91,
+      "rear_front_pair": {
+        "front_vehicle_id": 1887,
+        "back_vehicle_id": 1916,
+        "rear_point_front_vehicle_m": [
+          24.389,
+          12.901
+        ],
+        "front_point_back_vehicle_m": [
+          24.304,
+          7.703
+        ]
+      },
+      "speed_diff_mps": 2.56,
+      "speed_diff_kmh": 9.2,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:43.056938",
+      "frame": 3509,
+      "type": "Hard Braking",
+      "actor_1": "bus (ID:1889)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 11.5,
+      "acceleration_mps2": -20.21,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:43.363725",
+      "frame": 3511,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:1957)",
+      "actor_2": "car (ID:1916)",
+      "distance_m": 5.59,
+      "ttc_s": 2.98,
+      "longitudinal_gap_m": 5.58,
+      "lateral_sep_m": 0.34,
+      "heading_delta_deg": 4.6,
+      "closing_speed_mps": 1.88,
+      "front_long_speed_mps": 3.93,
+      "back_long_speed_mps": 5.81,
+      "rear_front_pair": {
+        "front_vehicle_id": 1916,
+        "back_vehicle_id": 1957,
+        "rear_point_front_vehicle_m": [
+          24.481,
+          16.094
+        ],
+        "front_point_back_vehicle_m": [
+          24.382,
+          10.507
+        ]
+      },
+      "speed_diff_mps": 1.87,
+      "speed_diff_kmh": 6.7,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:35:54.493344",
+      "frame": 3594,
+      "type": "Near-Miss Collision",
+      "actor_1": "car (ID:2001)",
+      "actor_2": "car (ID:1995)",
+      "distance_m": 4.92,
+      "ttc_s": 2.63,
+      "longitudinal_gap_m": 4.81,
+      "lateral_sep_m": 1.15,
+      "heading_delta_deg": 16.7,
+      "closing_speed_mps": 1.83,
+      "front_long_speed_mps": 3.72,
+      "back_long_speed_mps": 5.55,
+      "rear_front_pair": {
+        "front_vehicle_id": 1995,
+        "back_vehicle_id": 2001,
+        "rear_point_front_vehicle_m": [
+          24.926,
+          17.473
+        ],
+        "front_point_back_vehicle_m": [
+          24.146,
+          12.614
+        ]
+      },
+      "speed_diff_mps": 1.81,
+      "speed_diff_kmh": 6.5,
+      "probability_level": 3,
+      "severity_level": 1,
+      "composite_score": 3,
+      "risk": "Low"
+    },
+    {
+      "timestamp": "2026-04-13T17:36:55.763550",
+      "frame": 4040,
+      "type": "Hard Braking",
+      "actor_1": "truck (ID:2049)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.62,
+      "acceleration_mps2": -23.09,
+      "risk": "Medium"
+    },
+    {
+      "timestamp": "2026-04-13T17:36:56.249529",
+      "frame": 4044,
+      "type": "Hard Braking",
+      "actor_1": "car (ID:2235)",
+      "actor_2": null,
+      "distance_m": null,
+      "ttc_s": null,
+      "speed_mps": 6.95,
+      "acceleration_mps2": -38.96,
       "risk": "Medium"
     }
   ]

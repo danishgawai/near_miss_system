@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 import os
 # Define the path to your PyTorch model
-MODEL_PATH = 'yolo26n.pt'
+MODEL_PATH = 'yolov8s_merger8_exp1.pt'
 # os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 # Define the input image size
 IMG_SIZE = 640
@@ -34,7 +34,7 @@ def main():
     model.export(
         format='openvino',
         imgsz=IMG_SIZE,
-        half=True, # Use FP32 for CPU
+        # half=True, # Use FP32 for CPU
         int8=True
     )
     print("✅ OpenVINO export complete.")

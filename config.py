@@ -5,7 +5,7 @@ from typing import Dict, Set, List
 @dataclass
 class AppConfig:
     # I/O
-    source_stream: str = "vehicle_crash.mp4"
+    source_stream: str = "traffic_road_720_clipped.mp4"
     output_video_path: str = ""
     report_output_path: str = "near_miss_report.json"
     dashboard_output_path: str = "near_miss_dashboard.html"
@@ -27,29 +27,29 @@ class AppConfig:
 
     # BEV
     bev_config_path: str = "bev_config.json"
-    default_pixels_per_meter: float = 80.0
+    default_pixels_per_meter: float = 40.0
 
     # Motion
     history_len: int = 30
     velocity_alpha: float = 0.45
     accel_alpha: float = 0.40
     hard_brake_mps2: float = -4.5
-    hard_brake_min_speed_mps: float = 4.0
+    hard_brake_min_speed_mps: float = 6.0
     use_optical_flow: bool = True
 
     # Near-miss
     proximity_gate_m: float = 18.0
-    collision_radius_m: float = 1.8
-    min_closing_speed_mps: float = 0.5
+    collision_radius_m: float = 3.0
+    min_closing_speed_mps: float = 1.5
     ttc_max_eval_s: float = 4.0
     ttc_high_s: float = 1.0
     ttc_med_s: float = 1.8
     ttc_low_s: float = 3.0
-    heading_conflict_deg: float = 65.0
+    heading_conflict_deg: float = 90.0
 
     # Persistence
-    incident_persist_frames: int = 5
-    incident_cooldown_frames: int = 30
+    incident_persist_frames: int = 3
+    incident_cooldown_frames: int = 15
 
     # Runtime
     run_time_seconds: int = 3000

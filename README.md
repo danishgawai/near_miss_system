@@ -68,9 +68,18 @@ project_root/
 - CPU environment (optimized for CPU usage)
 - OpenCV GUI support for calibration windows
 
+Create a virtual Environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 Install dependencies:
 
 ```bash
+# Note: If running on CPU, first install torch for CPU.
+# pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
 

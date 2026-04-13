@@ -1,0 +1,28 @@
+description: Ultralytics YOLOv8s model trained on projects/merger8/yolov8s/exp1/data.yaml
+author: Ultralytics
+date: '2026-04-13T15:53:19.108764'
+version: 8.4.35
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: Car
+  1: Bus
+  2: Truck
+  3: Motorcycle
+  4: Pedestrian
+  5: Bicycle
+args:
+  batch: 1
+  fraction: 1.0
+  half: false
+  int8: true
+  dynamic: false
+  nms: false
+channels: 3
+end2end: false
