@@ -1,19 +1,72 @@
-# Near-Miss Detection (Quick Test Guide)
+# Near-Miss Incident Detection System (CPU-Friendly)
 
-This project provides:
+A practical computer-vision pipeline for traffic safety analysis:
 
-1. **Simple detector + tracker test** (`run_tracker.py`)  
-2. **BEV calibration tool** (`bev_calibrator.py`)  
-3. **Main near-miss pipeline** (`main.py`) using BEV + TTC + risk scoring  
+- **Object Detection + Tracking**
+- **BEV (Bird’s-Eye View) projection**
+- **Near-miss logic (proximity + trajectory + TTC + hard braking)**
+- **Risk scoring (High / Medium / Low)**
+- **Video annotations + JSON report + HTML dashboard**
+
+This repository also includes:
+- `run_tracker.py` for quick detector/tracker smoke testing
+- `bev_calibrator.py` for homography + scale calibration
 
 ---
 
-## 1) Setup
+## Project Components
 
-### Requirements
-- Python 3.9+ (recommended)
-- CPU environment (project is CPU-friendly)
-- OpenCV GUI support (for calibration windows)
+### 1) Quick Test Script
+- **File**: `run_tracker.py`
+- Purpose: verify detector and tracker are working correctly on a sample video.
+- Output: annotated tracking video.
+
+### 2) BEV Calibration Tool
+- **File**: `bev_calibrator.py`
+- Purpose: create `bev_config.json` with:
+  - Homography matrix
+  - Calibration points
+  - Pixels-per-meter scale
+
+### 3) Main Near-Miss Application
+- **File**: `main.py`
+- Purpose: full pipeline for near-miss detection and reporting.
+
+---
+
+## Suggested Project Structure
+
+```text
+project_root/
+├─ main.py
+├─ config.py
+├─ run_tracker.py
+├─ bev_calibrator.py
+├─ requirements.txt
+├─ README.md
+├─ models/
+│  └─ yolo26n_int8_openvino_model/
+├─ utils/
+│  ├─ yolo_infer.py
+│  ├─ near_miss.py
+│  ├─ tracker_manager.py
+│  ├─ motion.py
+│  ├─ visualization.py
+│  ├─ reporting.py
+│  └─ bev.py
+└─ tracker/
+   ├─byte_tracker.py
+   ├─basetrack.py
+   └─ utils/
+```
+
+---
+
+## Requirements
+
+- Python 3.9+ recommended
+- CPU environment (optimized for CPU usage)
+- OpenCV GUI support for calibration windows
 
 Install dependencies:
 
@@ -21,125 +74,172 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+Example `requirements.txt`:
+
+```txt
+ultralytics 
+openpyxl 
+pandas 
+opencv-python 
+lap 
+cython_bbox 
+shapely
+```
+
 ---
 
-## 2) Quick detector + tracker test (`run_tracker.py`)
+## Quick Start (Recommended Order)
 
-Use this first to verify model loading, detection, and tracking.
+1. **Run tracker smoke test**
+2. **Calibrate BEV**
+3. **Run main near-miss pipeline**
 
-### Edit test source
-In `run_tracker.py`, set:
+---
 
-- `source_stream = "your_video.mp4"`
+## 1) Run Simple Detector + Tracker (Testing)
+
+Use this to quickly validate model/tracker behavior before full pipeline.
+
+### Edit source video
+In `run_tracker.py`:
+```python
+source_stream = "your_video.mp4"
+```
 
 ### Run
 ```bash
 python run_tracker.py
 ```
 
-### Expected output
-- Console logs for frame processing and FPS
-- Output video file like: `video_out_YYYY-MM-DD_HH:MM:SS.mp4`
-- Track trails drawn on moving objects
+### Expected
+- Console FPS/frame logs
+- Output annotated video (e.g., `video_out_*.mp4`)
+- Track trails visible on moving objects
 
-> Note: This script is only for quick testing (no BEV / near-miss logic).
+> Note: This script is only for testing and does not perform near-miss analytics.
 
 ---
 
-## 3) BEV calibration (`bev_calibrator.py`)
+## 2) BEV Calibration
 
-Run calibration before the main near-miss app.
+Before running near-miss logic, generate a reliable BEV config.
 
 ### Run
 ```bash
 python bev_calibrator.py --video your_video.mp4 --frame-index 100 --output-config bev_config.json
 ```
 
-### Calibration workflow
-A window opens with:
-- **Left**: real frame (source points)
-- **Right**: BEV canvas (destination points)
+### Calibration UI
+- **Left panel**: real camera frame (source points)
+- **Right panel**: BEV canvas (destination points)
 
-#### Controls
-- Left click: select points (alternate left/right)
-- `r`: reset points
-- `Enter`: compute homography (need >= 4 matched pairs)
-- In BEV preview:
-  - `s`: continue to scale calibration and save
+### Controls
+- Left click: add points (alternate left/right)
+- `r`: reset
+- `Enter`: compute homography (requires >= 4 matched pairs)
+- Preview window:
+  - `s`: save and continue to scale calibration
   - `q`: quit without saving
 
-#### Best practice
-- Use **8–12 point pairs** spread across the road area
+### Best Practices
+- Use **4–8 matched pairs** 
+- Spread points across full drivable area
 - Avoid collinear points
-- Prefer corners/line intersections/markings visible in both views
+- Use stable landmarks (lane corners, stop-line intersections, road markings)
 
-### Scale calibration
+### Scale Calibration
 After homography preview:
-1. Click 2 points on BEV image with known real distance
+1. Click 2 points with known real-world distance
 2. Press `Enter`
-3. Input distance in meters (example: lane width)
+3. Enter distance in meters (e.g., lane width)
 
-This computes `pixels_per_meter`.
+Tool computes `pixels_per_meter` and saves config.
 
 ### Output
-- `bev_config.json` containing:
-  - homography matrix
-  - source/destination points
-  - pixels_per_meter
+`bev_config.json` with homography + scale parameters.
 
 ---
 
-## 4) Run main near-miss pipeline (`main.py`)
+## 3) Run Main Near-Miss Application
 
-Ensure config paths are correct in `config.py`:
-- `source_stream`
-- `bev_config_path` (usually `bev_config.json`)
+Ensure `config.py` points to:
+- video source
 - model path
+- `bev_config.json`
 
 ### Run
 ```bash
 python main.py
 ```
 
-### Outputs
-- Annotated output video
+### Main Outputs
+- Annotated output video (`video_out_*.mp4`)
 - `near_miss_report.json`
 - `near_miss_dashboard.html`
 - High-risk frame snapshots (if enabled)
 
 ---
 
-## 5) Minimal test order (recommended)
+## Near-Miss Logic Summary
 
-1. `python run_tracker.py` → confirm detector/tracker works  
-2. `python bev_calibrator.py ...` → generate valid `bev_config.json`  
-3. `python main.py` → run near-miss analysis  
+The main app evaluates near-miss events using:
+- Proximity gate (distance threshold in BEV meters)
+- Relative motion and trajectory conflict
+- TTC (time-to-collision) estimation
+- Hard-braking events
+- Risk matrix (probability × severity)
+
+Events are tagged with:
+- timestamp
+- frame index
+- actor IDs/classes
+- TTC/distance/speed metrics
+- risk level (High/Medium/Low)
 
 ---
 
-## 6) Common issues
+## Basic Tuning Guide
 
-### No calibration window appears
-- Use local desktop Python (not headless server)
-- Ensure OpenCV GUI backend is available
-
-### BEV distances look wrong
-- Recalibrate with better spread points
-- Recheck scale distance input
-- Ensure same camera/video as runtime
-
-### Too many false near-miss alerts
+If too many false alerts:
 - Increase `incident_persist_frames`
 - Increase `min_closing_speed_mps`
 - Reduce `proximity_gate_m`
-- Increase detector confidence
+- Increase `model_conf`
+
+If missing incidents:
+- Reduce `model_conf`
+- Increase `proximity_gate_m`
+- Reduce `incident_persist_frames`
+- Verify BEV calibration quality
+
+If hard-braking is too noisy:
+- decrease sensitivity by lowering threshold (e.g., `-4.5` → `-5.5`)
+- increase `hard_brake_min_speed_mps`
 
 ---
 
-## 7) Example commands
+## Common Issues
+
+### 1) Missing Detections and tracks
+- Current Coco model miss detections when vehicles moves further from camera.
+- Due to missed detections, frequent track id switch is observed, reducing overall event accuracy.
+
+### 2) Distances/TTC unrealistic
+- Bad homography point selection
+- Wrong scale distance input
+- Using different camera/video than calibrated source
+
+### 3) Tracker ID switching
+- Tune `match_thresh`, `track_buffer`
+- Increase tracking stabilization
+- Consider stronger tracker variant (future scope)
+
+---
+
+## Example Commands
 
 ```bash
-# 1) Tracker smoke test
+# 1) Quick detector+tracker test
 python run_tracker.py
 
 # 2) BEV calibration
@@ -151,6 +251,39 @@ python main.py
 
 ---
 
-## Notes
-- `run_tracker.py` is intended for **testing only**.
-- For project/demo outputs, use calibrated BEV + `main.py`.
+## Future Scope / Improvements
+
+### Detection & Tracking
+- Fine-tune model for consistent detections and tracking.
+- Add re-identification embeddings to reduce ID switches after occlusion.
+
+### Motion & Forecasting
+- Replace simple TTC with multi-step trajectory forecasting (Kalman/CA models).
+- Add curvature/lane-aware trajectory constraints for intersections.
+
+### Optical Flow & Scene Context
+- Improve optical-flow integration for occlusion-heavy scenes.
+- Add lane/road segmentation for context-aware filtering.
+
+### False Positive Reduction
+- Adaptive thresholds by traffic density and object class pair.
+- Event verification stage for uncertain incidents.
+- Raise events for individual ID's or group of vehicle involved in the incident.
+
+### Severity Scoring
+- Train a lightweight ML severity model using:
+  TTC trend, distance trend, heading conflict, speed delta, braking profile.
+- Keep explainable outputs for reporting.
+
+### Productization
+- Real-Time processing (RTSP in, alert out).
+- REST API for incidents and analytics.
+- Dockerized deployment with CPU/GPU profiles.
+
+---
+
+## Author
+
+- Author: Danish Ahmed
+- Mail: Danishh163@gmail.com
+- Status: Development 
