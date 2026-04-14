@@ -1,3 +1,5 @@
+"""Motion state and estimation for tracked objects in BEV space."""
+
 import numpy as np
 from dataclasses import dataclass, field
 from collections import deque
@@ -10,32 +12,36 @@ class TrackState:
     cls_name: str
     age: int = 0
 
-    # Image + BEV history
     img_points: deque = field(default_factory=lambda: deque(maxlen=30))
     bev_positions: deque = field(default_factory=lambda: deque(maxlen=30))
 
-    # Kinematics in BEV (m, m/s, m/s²)
     vel: np.ndarray = field(default_factory=lambda: np.zeros(2, dtype=np.float32))
     acc_vec: np.ndarray = field(default_factory=lambda: np.zeros(2, dtype=np.float32))
     speed: float = 0.0
     acc: float = 0.0
     heading_deg: float = 0.0
     lateral_acc: float = 0.0
-
-    # Quality
+    lateral_acc_hist: deque = field(default_factory=lambda: deque(maxlen=10))
+    heading_hist: deque = field(default_factory=lambda: deque(maxlen=10))
     confidence: float = 0.0
     direction_consistency: float = 0.0
 
-    # Last bbox
     last_bbox: Optional[List[int]] = None
 
 
 class MotionEstimator:
-    def __init__(self, fps: float, velocity_alpha: float = 0.45, accel_alpha: float = 0.35):
+    def __init__(
+        self,
+        fps: float,
+        velocity_alpha: float = 0.45,
+        accel_alpha: float = 0.35,
+        max_speed_mps: float = 40.0,
+    ):
         self.fps = fps if fps > 0 else 30.0
         self.dt = 1.0 / self.fps
         self.v_alpha = float(velocity_alpha)
         self.a_alpha = float(accel_alpha)
+        self.max_speed_mps = float(max_speed_mps)   # hard physical ceiling
 
     @staticmethod
     def _safe_norm(v: np.ndarray, eps: float = 1e-6):
@@ -62,12 +68,16 @@ class MotionEstimator:
         if len(pts) < 4:
             return 0.0
         vecs = [pts[i] - pts[i - 1] for i in range(1, len(pts))]
-        angs = [float(np.arctan2(v[1], v[0])) for v in vecs if float(np.linalg.norm(v)) > 0.01]
+        angs = [
+            float(np.arctan2(v[1], v[0]))
+            for v in vecs
+            if float(np.linalg.norm(v)) > 0.01
+        ]
         if len(angs) < 2:
             return 0.0
         mean_cos = float(np.mean([np.cos(a) for a in angs]))
         mean_sin = float(np.mean([np.sin(a) for a in angs]))
-        r = np.sqrt(mean_cos**2 + mean_sin**2)
+        r = np.sqrt(mean_cos ** 2 + mean_sin ** 2)
         return float(np.clip(r, 0.0, 1.0))
 
     def update_track(self, trk: TrackState, bev_pos: np.ndarray):
@@ -89,7 +99,15 @@ class MotionEstimator:
         prev_pos = trk.bev_positions[-1]
         raw_vel = (bev_pos - prev_pos) / self.dt
 
-        # Adaptive smoothness: young tracks react faster
+        # ── Velocity spike rejection ────────────────────────────────────────
+        # If the raw displacement implies a physically impossible speed,
+        # discard this position update entirely (bad BEV point / occlusion).
+        if float(np.linalg.norm(raw_vel)) > self.max_speed_mps:
+            trk.age += 1
+            return
+
+        # Adaptive alpha: young tracks react faster to build up estimate,
+        # but are guarded by the spike cap above.
         a_v = min(0.75, self.v_alpha + 0.2 / (trk.age + 1))
         prev_vel = trk.vel.copy()
         new_vel = a_v * raw_vel + (1.0 - a_v) * trk.vel
@@ -102,7 +120,11 @@ class MotionEstimator:
         raw_acc = (new_speed - prev_speed) / self.dt
         new_acc = self.a_alpha * raw_acc + (1.0 - self.a_alpha) * trk.acc
 
-        heading = float(np.degrees(np.arctan2(new_vel[1], new_vel[0]))) if new_speed > 0.05 else trk.heading_deg
+        heading = (
+            float(np.degrees(np.arctan2(new_vel[1], new_vel[0])))
+            if new_speed > 0.05
+            else trk.heading_deg
+        )
 
         lateral_acc = 0.0
         if new_speed > 1.0:
@@ -119,4 +141,6 @@ class MotionEstimator:
         trk.lateral_acc = lateral_acc
         trk.confidence = self._calc_confidence(trk)
         trk.direction_consistency = self._calc_direction_consistency(trk)
+        trk.lateral_acc_hist.append(lateral_acc)
+        trk.heading_hist.append(heading)
         trk.age += 1

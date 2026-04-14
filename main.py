@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Near-Miss Incident Detection System — main pipeline entry point."""
+
 import os
 import time
 import logging
@@ -44,17 +46,21 @@ def run():
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+    # ── Pass actual frame dimensions to config for border guard ──────────
+    cfg.frame_width = w
+    cfg.frame_height = h
+
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_video = cfg.output_video_path or f"video_out_{ts}.mp4"
     writer = cv2.VideoWriter(out_video, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
 
-    tracker = TrackerManager(cfg.track_thresh, cfg.track_buffer, cfg.match_thresh, fps)
+    tracker  = TrackerManager(cfg.track_thresh, cfg.track_buffer, cfg.match_thresh, fps)
     projector = BEVProjector(cfg.bev_config_path, cfg.default_pixels_per_meter)
-    motion = MotionEstimator(fps, cfg.velocity_alpha, cfg.accel_alpha)
+    motion   = MotionEstimator(fps, cfg.velocity_alpha, cfg.accel_alpha, cfg.max_speed_mps)
     risk_engine = NearMissEngine(cfg)
     reporter = Reporter(fps)
 
-    tracks_state = {}
+    tracks_state: dict = {}
     track_history = defaultdict(lambda: deque(maxlen=cfg.history_len))
     missing_count = defaultdict(int)
 
@@ -62,7 +68,7 @@ def run():
     start = time.time()
     total_time = 0.0
     total_incidents = 0
-    max_missing_keep = 8  # keep short occlusions for stability
+    max_missing_keep = 8
 
     while True:
         ok, frame = cap.read()
@@ -93,7 +99,7 @@ def run():
 
             x1, y1, x2, y2 = box.astype(np.int32)
             cx = int((x1 + x2) / 2)
-            cy = int(y2)  # contact-ish point on road
+            cy = int((y1 + y2) / 2)    # true centre — consistent with BEV paper
             cls_name = cfg.class_mapping.get(int(cls_id), "vehicle")
 
             if tid not in tracks_state:
@@ -109,7 +115,7 @@ def run():
 
             track_history[tid].append((cx, cy))
 
-        # handle temporarily missing tracks
+        # Handle temporarily missing tracks
         for tid in list(tracks_state.keys()):
             if tid not in active_ids:
                 missing_count[tid] += 1
@@ -121,7 +127,7 @@ def run():
             if tid not in tracks_state:
                 del track_history[tid]
 
-        # 4) Risk eval
+        # 4) Risk evaluation
         now = datetime.now().isoformat()
         incidents = risk_engine.evaluate(frame_idx, now, tracks_state)
         reporter.add(incidents)
@@ -135,7 +141,7 @@ def run():
 
         annotated = draw_frame(
             annotated, valid_tracks, cfg.class_mapping, track_history, incidents,
-            frame_idx, total_frames, cur_fps, avg_fps, total_incidents
+            frame_idx, total_frames, cur_fps, avg_fps, total_incidents,
         )
         writer.write(annotated)
 
@@ -144,12 +150,15 @@ def run():
             os.makedirs(cfg.high_risk_frame_dir, exist_ok=True)
             snap = os.path.join(cfg.high_risk_frame_dir, f"frame_{frame_idx:06d}.jpg")
             cv2.imwrite(snap, annotated)
-            logging.warning(f"HIGH RISK frame {frame_idx}: {len(high)} incidents -> {snap}")
+            logging.warning(
+                f"HIGH RISK frame {frame_idx}: {len(high)} incidents → {snap}"
+            )
 
         if frame_idx % 30 == 0 or incidents:
             logging.info(
-                f"F{frame_idx}/{total_frames} det={len(boxes)} trk={len(valid_tracks)} "
-                f"inc={len(incidents)} fps={cur_fps:.1f} avg={avg_fps:.1f}"
+                f"F{frame_idx}/{total_frames}  det={len(boxes)}  "
+                f"trk={len(valid_tracks)}  inc={len(incidents)}  "
+                f"fps={cur_fps:.1f}  avg={avg_fps:.1f}"
             )
 
         if time.time() - start > cfg.run_time_seconds:

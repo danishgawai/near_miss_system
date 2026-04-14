@@ -2,6 +2,52 @@ import json
 from datetime import datetime
 from collections import defaultdict
 
+import csv
+
+
+class TelemetryLogger:
+    def __init__(self, path: str):
+        self.path = path
+        self.fp = None
+        self.writer = None
+
+    def open(self):
+        self.fp = open(self.path, "w", newline="", encoding="utf-8")
+        self.writer = csv.writer(self.fp)
+        self.writer.writerow([
+            "frame",
+            "timestamp",
+            "track_id",
+            "class_name",
+            "bev_x",
+            "bev_y",
+            "speed_mps",
+            "heading_deg",
+            "acc_mps2",
+            "risk_index",
+        ])
+
+    def log(self, frame_idx, timestamp, track_id, class_name, bev_x, bev_y, speed, heading, acc, risk_index):
+        if self.writer is None:
+            return
+        self.writer.writerow([
+            frame_idx,
+            timestamp,
+            track_id,
+            class_name,
+            round(float(bev_x), 4),
+            round(float(bev_y), 4),
+            round(float(speed), 4),
+            round(float(heading), 4),
+            round(float(acc), 4),
+            round(float(risk_index), 4),
+        ])
+
+    def close(self):
+        if self.fp:
+            self.fp.close()
+            self.fp = None
+            self.writer = None
 
 class Reporter:
     def __init__(self, fps: float):
