@@ -200,14 +200,23 @@ def run():
             )
             writer.write(annotated)
 
+            collisions = [x for x in incidents if x.get("risk") == "Critical"]
             high = [x for x in incidents if x.get("risk") == "High"]
-            if high:
+            if collisions or high:
                 os.makedirs(cfg.high_risk_frame_dir, exist_ok=True)
                 snap = os.path.join(cfg.high_risk_frame_dir, f"frame_{frame_idx:06d}.jpg")
                 cv2.imwrite(snap, annotated)
-                logging.warning(
-                    f"HIGH RISK frame {frame_idx}: {len(high)} incidents → {snap}"
-                )
+                if collisions:
+                    for c in collisions:
+                        logging.critical(
+                            f"COLLISION frame {frame_idx}: {c['actor_1']} vs {c['actor_2']} "
+                            f"impact={c['impact_rel_speed_kmh']} km/h "
+                            f"evidence={c['evidence']} → {snap}"
+                        )
+                else:
+                    logging.warning(
+                        f"HIGH RISK frame {frame_idx}: {len(high)} incidents → {snap}"
+                    )
 
             if frame_idx % 30 == 0 or incidents:
                 logging.info(

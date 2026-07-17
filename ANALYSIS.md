@@ -156,7 +156,41 @@ vehicle's jitter cannot fake a consistent direction.
 
 ---
 
-## 4. Remaining limitations (known, deliberate)
+## 4. Collision detection (escalation beyond near-miss)
+
+Footprint overlap alone is a false-positive machine: circular footprint
+approximations of adjacent-lane traffic graze each other, and occluding
+objects (one passing in front of another) can drive projected ground points
+together with no crash. A confirmed collision therefore requires three
+independent conditions (`_evaluate_collisions`, per-pair state machine):
+
+1. **Contact** — edge distance ≤ `collision_overlap_m`, sustained for
+   `collision_persist_frames`.
+2. **Approach** — in the pre-contact window the pair was genuinely
+   converging: max closing speed ≥ `collision_min_closing_mps` and max
+   relative speed ≥ `collision_min_impact_rel_speed_mps`. Parallel traffic
+   has closing ≈ 0 and is rejected here.
+3. **Impact evidence** — within `collision_post_window_frames` of contact,
+   momentum exchange must appear: a deceleration spike ≤
+   `collision_impact_decel_mps2` on either track, relative speed collapsing
+   below `(1 − drop_ratio) ×` its pre-impact value, or both tracks at rest.
+   Occlusion pass-throughs separate at unchanged speed and never produce
+   this, so the episode times out silently.
+
+Confirmed collisions fire at a new risk level **Critical** (RI = 1.0,
+magenta in overlays, own dashboard card), carry the reconstructed impact
+relative speed and evidence list, and place the pair in a long cooldown that
+also silences redundant near-miss alerts for the same pair. The near-miss
+trail *before* the collision is intentionally preserved — it documents the
+escalation.
+
+Known trade-off: very low-speed taps (below
+`collision_min_impact_rel_speed_mps`) are ignored by design — at CCTV
+tracking noise levels they are indistinguishable from queueing traffic.
+Vehicle-vs-infrastructure crashes (poles, barriers) are out of scope while
+the detector only reports road users.
+
+## 5. Remaining limitations (known, deliberate)
 
 - **O(n²) pair loop** — fine to ~150 concurrent tracks; add a BEV grid hash
   if deployments exceed that.

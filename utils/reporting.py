@@ -108,9 +108,21 @@ class Reporter:
         return s
 
 
+RISK_HEX = {
+    "Critical": "#d946ef",
+    "High": "#ff4444",
+    "Medium": "#ff8c00",
+    "Low": "#ffd700",
+}
+
+
 def save_dashboard(summary: dict, path: str):
-    risk_labels = json.dumps(list(summary.get("risk_distribution", {}).keys()))
-    risk_values = json.dumps(list(summary.get("risk_distribution", {}).values()))
+    risk_dist = summary.get("risk_distribution", {})
+    risk_labels = json.dumps(list(risk_dist.keys()))
+    risk_values = json.dumps(list(risk_dist.values()))
+    # Colours mapped BY LABEL — a fixed array silently mismatches when the
+    # label order varies (dict insertion order follows first occurrence).
+    risk_colors = json.dumps([RISK_HEX.get(k, "#4caf50") for k in risk_dist.keys()])
     temp_labels = json.dumps(list(summary.get("temporal_analysis", {}).keys()))
     temp_values = json.dumps(list(summary.get("temporal_analysis", {}).values()))
     cls_labels = json.dumps(list(summary.get("involved_classes", {}).keys()))
@@ -120,9 +132,10 @@ def save_dashboard(summary: dict, path: str):
     scen_values = json.dumps(list(summary.get("scenario_distribution", {}).values()))
 
     total = summary.get("total_near_misses", 0)
-    high = summary.get("risk_distribution", {}).get("High", 0)
-    medium = summary.get("risk_distribution", {}).get("Medium", 0)
-    low = summary.get("risk_distribution", {}).get("Low", 0)
+    critical = risk_dist.get("Critical", 0)
+    high = risk_dist.get("High", 0)
+    medium = risk_dist.get("Medium", 0)
+    low = risk_dist.get("Low", 0)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -146,6 +159,7 @@ def save_dashboard(summary: dict, path: str):
 <h1>🚨 Near-Miss Incident Dashboard</h1>
 <div class="stats">
   <div class="card"><div class="num">{total}</div><div class="lbl">Total</div></div>
+  <div class="card"><div class="num" style="color:#d946ef">{critical}</div><div class="lbl">Collisions</div></div>
   <div class="card"><div class="num" style="color:#ff4444">{high}</div><div class="lbl">High</div></div>
   <div class="card"><div class="num" style="color:#ff8c00">{medium}</div><div class="lbl">Medium</div></div>
   <div class="card"><div class="num" style="color:#ffd700">{low}</div><div class="lbl">Low</div></div>
@@ -159,7 +173,7 @@ def save_dashboard(summary: dict, path: str):
 <script>
 new Chart(document.getElementById('c1'),{{
   type:'doughnut',
-  data:{{labels:{risk_labels},datasets:[{{data:{risk_values},backgroundColor:['#ff4444','#ff8c00','#ffd700','#4caf50']}}]}},
+  data:{{labels:{risk_labels},datasets:[{{data:{risk_values},backgroundColor:{risk_colors}}}]}},
   options:{{plugins:{{title:{{display:true,text:'Risk Distribution',color:'#eee'}}}}}}
 }});
 new Chart(document.getElementById('c2'),{{

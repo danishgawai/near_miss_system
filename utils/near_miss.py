@@ -36,7 +36,7 @@ which is exactly the case that must score highest.
 """
 
 import numpy as np
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import Dict, List, Optional, Tuple
 
 from utils.motion import TrackState
@@ -56,6 +56,10 @@ class NearMissEngine:
         self.swerve_cooldown: Dict[int, int] = {}
         self.brake_persist: Dict[int, int] = defaultdict(int)
         self.brake_cooldown: Dict[int, int] = {}
+        # Collision state machine (see _evaluate_collisions)
+        self.pair_history: Dict[Tuple[int, int], deque] = {}   # pre-contact kinematics
+        self.pair_contact: Dict[Tuple[int, int], dict] = {}    # active contact episodes
+        self.collision_cooldown: Dict[Tuple[int, int], int] = {}
 
     # ── housekeeping ──────────────────────────────────────────────────────
 
@@ -84,6 +88,11 @@ class NearMissEngine:
             int, {k: v for k, v in self.brake_persist.items() if k in live and v > 0}
         )
         self.brake_cooldown = {k: v for k, v in self.brake_cooldown.items() if k in live}
+        self.pair_history = {k: v for k, v in self.pair_history.items() if _pair_ok(k)}
+        self.pair_contact = {k: v for k, v in self.pair_contact.items() if _pair_ok(k)}
+        self.collision_cooldown = {
+            k: v for k, v in self.collision_cooldown.items() if _pair_ok(k)
+        }
 
     @staticmethod
     def _tick(cooldowns: dict) -> None:
@@ -236,6 +245,152 @@ class NearMissEngine:
             and trk.direction_consistency >= self.cfg.direction_consistency_min
         )
 
+    # ── collision detection ───────────────────────────────────────────────
+
+    def _evaluate_collisions(
+        self,
+        frame_idx: int,
+        timestamp: str,
+        tracks: Dict[int, TrackState],
+        video_time_s: Optional[float],
+    ) -> List[dict]:
+        """Per-pair contact state machine.
+
+        A collision is confirmed only when three independent conditions hold:
+          1. CONTACT  — edge distance <= collision_overlap_m for at least
+                        collision_persist_frames;
+          2. APPROACH — in the pre-contact window the pair was genuinely
+                        converging (closing speed and relative speed above
+                        thresholds). Adjacent-lane traffic whose circular
+                        footprint approximations graze each other has
+                        closing ≈ 0 and is rejected here;
+          3. IMPACT   — within collision_post_window_frames after contact,
+                        kinematic evidence of momentum exchange appears:
+                        a deceleration spike on either track, a collapse of
+                        relative speed, or both tracks coming to rest.
+                        Occlusion pass-throughs (tracks crossing in image
+                        space) separate at unchanged speed and never
+                        produce this evidence.
+        """
+        cfg = self.cfg
+        incidents: List[dict] = []
+        ids = list(tracks.keys())
+
+        for i in range(len(ids)):
+            for j in range(i + 1, len(ids)):
+                id1, id2 = ids[i], ids[j]
+                t1, t2 = tracks[id1], tracks[id2]
+                key = self._pair_key(id1, id2)
+
+                if key in self.collision_cooldown:
+                    continue
+                if (t1.age < cfg.collision_min_track_age or
+                        t2.age < cfg.collision_min_track_age or
+                        not (t1.kinematics_valid and t2.kinematics_valid)):
+                    continue
+                if self._is_near_border(t1) or self._is_near_border(t2):
+                    continue
+
+                p1 = np.asarray(t1.bev_positions[-1], dtype=np.float64)
+                p2 = np.asarray(t2.bev_positions[-1], dtype=np.float64)
+                dp = p2 - p1
+                dist = float(np.linalg.norm(dp))
+
+                if dist > cfg.collision_watch_radius_m:
+                    self.pair_history.pop(key, None)
+                    self.pair_contact.pop(key, None)
+                    continue
+
+                v1 = np.asarray(t1.vel, dtype=np.float64)
+                v2 = np.asarray(t2.vel, dtype=np.float64)
+                r1, r2 = t1.bev_radius_m, t2.bev_radius_m
+                edge = max(0.0, dist - r1 - r2)
+                u_sep = dp / max(dist, 1e-6)
+                closing = float(np.dot(v1 - v2, u_sep))
+                rel_speed = float(np.linalg.norm(v1 - v2))
+
+                st = self.pair_contact.get(key)
+
+                if st is None:
+                    hist = self.pair_history.setdefault(
+                        key, deque(maxlen=cfg.collision_pre_window_frames)
+                    )
+                    if edge <= cfg.collision_overlap_m and len(hist) >= 3:
+                        # Condition 2 — approach evidence from the PRE-contact window
+                        max_closing = max(h[0] for h in hist)
+                        max_rel = max(h[1] for h in hist)
+                        if (max_closing >= cfg.collision_min_closing_mps and
+                                max_rel >= cfg.collision_min_impact_rel_speed_mps):
+                            self.pair_contact[key] = {
+                                "start": frame_idx,
+                                "pre_rel": max_rel,
+                                "pre_closing": max_closing,
+                                "overlap_frames": 1,
+                            }
+                    hist.append((closing, rel_speed))
+                    continue
+
+                # Active contact episode — look for impact evidence (condition 3)
+                if edge <= cfg.collision_overlap_m:
+                    st["overlap_frames"] += 1
+
+                decel_min = min(t1.acc, t2.acc)
+                evidence_decel = decel_min <= cfg.collision_impact_decel_mps2
+                evidence_rel_drop = (
+                    rel_speed <= (1.0 - cfg.collision_rel_speed_drop_ratio) * st["pre_rel"]
+                )
+                evidence_stopped = (
+                    max(t1.speed, t2.speed) <= cfg.collision_stopped_speed_mps
+                )
+
+                if (st["overlap_frames"] >= cfg.collision_persist_frames and
+                        (evidence_decel or evidence_rel_drop or evidence_stopped)):
+                    vuln = (t1.cls_name in cfg.vulnerable_classes or
+                            t2.cls_name in cfg.vulnerable_classes)
+                    incidents.append({
+                        "timestamp":            timestamp,
+                        "video_time_s":         round(video_time_s, 2) if video_time_s is not None else None,
+                        "frame":                frame_idx,
+                        "type":                 "Collision",
+                        "scenario":             "collision",
+                        "actor_1":              f"{t1.cls_name} (ID:{id1})",
+                        "actor_2":              f"{t2.cls_name} (ID:{id2})",
+                        "actor_1_id":           id1,
+                        "actor_2_id":           id2,
+                        "impact_rel_speed_mps": round(st["pre_rel"], 2),
+                        "impact_rel_speed_kmh": round(st["pre_rel"] * 3.6, 1),
+                        "post_rel_speed_mps":   round(rel_speed, 2),
+                        "pre_closing_mps":      round(st["pre_closing"], 2),
+                        "max_deceleration_mps2": round(decel_min, 2),
+                        "overlap_frames":       st["overlap_frames"],
+                        "edge_distance_m":      round(edge, 2),
+                        "centre_distance_m":    round(dist, 2),
+                        "evidence": [
+                            e for e, ok in (
+                                ("deceleration_spike", evidence_decel),
+                                ("rel_speed_collapse", evidence_rel_drop),
+                                ("both_stopped", evidence_stopped),
+                            ) if ok
+                        ],
+                        "vulnerable_involved":  vuln,
+                        "probability_level":    5,
+                        "severity_level":       5,
+                        "composite_score":      25,
+                        "risk_index":           1.0,
+                        "risk":                 "Critical",
+                        "confidence":           round(float(min(t1.det_score, t2.det_score)), 3),
+                    })
+                    self.collision_cooldown[key] = cfg.collision_cooldown_frames
+                    self.pair_contact.pop(key, None)
+                    self.pair_history.pop(key, None)
+                elif frame_idx - st["start"] > cfg.collision_post_window_frames:
+                    # No impact signature in time — passing occlusion or a
+                    # graze; abort and let the near-miss logic own this pair.
+                    self.pair_contact.pop(key, None)
+                    self.pair_history.pop(key, None)
+
+        return incidents
+
     # ── main entry point ──────────────────────────────────────────────────
 
     def evaluate(
@@ -252,6 +407,13 @@ class NearMissEngine:
         self._tick(self.pair_cooldown)
         self._tick(self.swerve_cooldown)
         self._tick(self.brake_cooldown)
+        self._tick(self.collision_cooldown)
+
+        # ── Collision detection (runs first; a confirmed collision
+        #    silences near-miss alerts for that pair via its cooldown) ─────
+        incidents.extend(
+            self._evaluate_collisions(frame_idx, timestamp, tracks, video_time_s)
+        )
 
         # ── Pairwise near-miss evaluation ─────────────────────────────────
         for i in range(len(ids)):
@@ -260,8 +422,8 @@ class NearMissEngine:
                 t1, t2 = tracks[id1], tracks[id2]
                 key = self._pair_key(id1, id2)
 
-                # Gate 1 — cooldown
-                if key in self.pair_cooldown:
+                # Gate 1 — cooldown (near-miss or confirmed-collision)
+                if key in self.pair_cooldown or key in self.collision_cooldown:
                     continue
 
                 # Gate 2 — track age

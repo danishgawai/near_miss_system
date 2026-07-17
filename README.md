@@ -13,7 +13,9 @@ and classifies near-miss events from standard CCTV footage — no GPU required.
 - Edge-to-edge BEV distance (not centre-to-centre)
 - Per-class-pair TTC thresholds (car–car, car–pedestrian, etc.)
 - Single-object events: hard braking, sudden swerve (multi-frame confirmed)
-- Risk levels: High / Medium / Low
+- Collision detection: contact + approach + impact-evidence state machine
+  (deceleration spike / relative-speed collapse / both stopped)
+- Risk levels: Critical (collision) / High / Medium / Low
 - Video annotations + JSON report + HTML dashboard + CSV telemetry log
 
 Also included:
@@ -287,6 +289,21 @@ R_v   = speed_diff / ri_v_max               (motion intensity)
 
 Vulnerable-vs-heavy class interactions (e.g. pedestrian vs bus) receive a
 10 % RI boost before final classification.
+
+### Collision detection
+
+Runs alongside the near-miss gates as a per-pair state machine. A collision
+is confirmed (risk **Critical**) only when all three hold:
+
+| Condition | Meaning |
+|---|---|
+| Contact | edge distance ≤ `collision_overlap_m` for ≥ `collision_persist_frames` |
+| Approach | pre-contact closing speed ≥ `collision_min_closing_mps` and relative speed ≥ `collision_min_impact_rel_speed_mps` |
+| Impact evidence | deceleration spike, relative-speed collapse, or both tracks stopped, within `collision_post_window_frames` |
+
+Overlap without approach (adjacent lanes) or without impact evidence
+(occlusion pass-through) never fires. A confirmed collision silences further
+near-miss alerts for that pair via `collision_cooldown_frames`.
 
 ### Single-object events
 

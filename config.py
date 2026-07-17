@@ -59,6 +59,23 @@ class AppConfig:
     swerve_cooldown_frames: int = 30
     swerve_heading_delta_min_deg: float = 12.0
 
+    # ── Collision detection ───────────────────────────────────────────────
+    # A collision = contact + pre-impact approach + post-impact evidence.
+    # Contact alone is NOT enough: adjacent-lane traffic and occlusion
+    # artefacts produce footprint overlap without a crash.
+    collision_overlap_m: float = 0.15          # edge distance counted as contact
+    collision_min_track_age: int = 8           # lighter than near-miss age gate
+    collision_watch_radius_m: float = 12.0     # record pair history within this
+    collision_pre_window_frames: int = 10      # approach-evidence lookback
+    collision_post_window_frames: int = 15     # frames to wait for impact evidence
+    collision_min_closing_mps: float = 2.0     # required approach speed pre-contact
+    collision_min_impact_rel_speed_mps: float = 2.5  # below this a "tap" is ignored
+    collision_rel_speed_drop_ratio: float = 0.5      # momentum-exchange evidence
+    collision_impact_decel_mps2: float = -3.0        # decel-spike evidence
+    collision_stopped_speed_mps: float = 1.0         # both-at-rest evidence
+    collision_persist_frames: int = 2          # contact frames before firing
+    collision_cooldown_frames: int = 150       # a crash scene stays overlapped
+
     # Near-miss geometry gates
     proximity_gate_m: float = 18.0
     min_closing_speed_mps: float = 0.5

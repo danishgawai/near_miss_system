@@ -18,9 +18,10 @@ from collections import deque
 
 # Shared palette — used by BOTH bounding boxes AND overlay text
 RISK_COLORS = {
-    "High":   (0,   0,   255),   # red
-    "Medium": (0,   165, 255),   # orange
-    "Low":    (0,   200, 80),    # green
+    "Critical": (255, 0,   255),  # magenta — confirmed collision
+    "High":     (0,   0,   255),  # red
+    "Medium":   (0,   165, 255),  # orange
+    "Low":      (0,   200, 80),   # green
 }
 
 # Fallback when no risk level is assigned (neutral track)
@@ -36,7 +37,7 @@ SCENARIO_COLORS = {
 
 def build_risk_map(incidents: List[dict]) -> Dict[int, str]:
     """Return a dict of track_id → highest risk label for the current frame."""
-    priority = {"High": 3, "Medium": 2, "Low": 1}
+    priority = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
     out: Dict[int, str] = {}
     for inc in incidents:
         risk = inc.get("risk", "Low")
