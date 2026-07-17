@@ -314,7 +314,6 @@ class BYTETracker(object):
         self.tracked_stracks, self.lost_stracks = remove_duplicate_stracks(self.tracked_stracks, self.lost_stracks)
         # get scores of lost tracks
         output_stracks = [[track.track_id, track.centroid, track.tlbr, track.score, int(track.cls)] for track in self.tracked_stracks if track.is_activated]
-        print(output_stracks)
         return output_stracks
 
 def joint_stracks(tlista, tlistb):

@@ -31,13 +31,14 @@ class YOLO_Inference:
         results = self.model.predict(img_bgr, conf=self.conf_thres, device=self.device, verbose=False, classes=self.filter_class_ids)
         # print(f"Inference time: {(time.time() - start_time)*1000:.2f} ms")
         res = results[0]
-        boxes = res.boxes.xyxy.cpu().numpy().astype(int)   # [x1,y1,x2,y2]
-        scores = res.boxes.conf.cpu().numpy()              # float
+        boxes = res.boxes.xyxy.cpu().numpy()               # [x1,y1,x2,y2] float
+        scores = res.boxes.conf.cpu().numpy()              # float in [0, 1]
         class_ids = res.boxes.cls.cpu().numpy().astype(int)
-        
-        # Convert into desired format
+
+        # [x1, y1, x2, y2, score, cls_id] — score MUST stay in [0, 1]:
+        # ByteTrack's two-stage association and fuse_score() assume it.
         detections = [
-            box.tolist() + [int(score * 100), int(cls_id)]
+            box.tolist() + [float(score), int(cls_id)]
             for box, score, cls_id in zip(boxes, scores, class_ids)
         ]
     

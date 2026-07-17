@@ -40,15 +40,20 @@ def build_risk_map(incidents: List[dict]) -> Dict[int, str]:
     out: Dict[int, str] = {}
     for inc in incidents:
         risk = inc.get("risk", "Low")
-        for key in ("actor_1", "actor_2"):
-            actor = inc.get(key)
-            if actor and "ID:" in actor:
-                try:
-                    tid = int(actor.split("ID:")[1].rstrip(")"))
-                    if priority.get(risk, 0) > priority.get(out.get(tid, ""), 0):
-                        out[tid] = risk
-                except Exception:
-                    pass
+        for id_key, actor_key in (("actor_1_id", "actor_1"), ("actor_2_id", "actor_2")):
+            tid = inc.get(id_key)
+            if tid is None:
+                # Fallback for incidents lacking explicit ids: parse the label
+                actor = inc.get(actor_key)
+                if actor and "ID:" in actor:
+                    try:
+                        tid = int(actor.split("ID:")[1].rstrip(")"))
+                    except Exception:
+                        continue
+            if tid is None:
+                continue
+            if priority.get(risk, 0) > priority.get(out.get(tid, ""), 0):
+                out[tid] = risk
     return out
 
 
@@ -90,7 +95,7 @@ def draw_frame(
         color    = RISK_COLORS.get(risk, _DEFAULT_COLOR)
         thick    = 3 if risk else 2
 
-        label = f"ID:{tid} {cls_name} {int(score)}%"
+        label = f"ID:{tid} {cls_name} {int(float(score) * 100)}%"
         if risk:
             label += f" [{risk}]"
 

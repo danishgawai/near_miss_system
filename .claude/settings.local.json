@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python \"C:\\\\Users\\\\danis\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-danis-Downloads-near-miss-system-main-near-miss-system-main\\\\326123e0-6514-4769-bb84-4ade7c376f4c\\\\scratchpad\\\\test_math.py\")",
+      "PowerShell(python -m pip install numpy --quiet --disable-pip-version-check 2>$null)",
+      "PowerShell(python -c \"import numpy; print\\(numpy.__version__\\)\")"
+    ]
+  }
+}

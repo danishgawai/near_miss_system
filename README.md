@@ -242,7 +242,7 @@ incident is fired.
 | # | Gate | Rejects |
 |---|---|---|
 | 1 | Cooldown | Pairs that recently fired an incident |
-| 2 | Track age | Tracks too young — velocity EMA not yet stable |
+| 2 | Track age | Tracks too young — Kalman velocity not yet converged |
 | 3 | Frame border | Tracks near the frame edge — unreliable BEV homography |
 | 4 | BEV positions | Tracks without enough history for velocity |
 | 5 | Proximity | Pairs farther apart than `proximity_gate_m` |
@@ -308,7 +308,7 @@ Key groups:
 | Tracking | `track_thresh`, `match_thresh`, `track_buffer`, `min_track_age_for_risk` |
 | BEV | `bev_config_path`, `default_pixels_per_meter` |
 | Border guard | `frame_border_margin` |
-| Motion | `velocity_alpha`, `accel_alpha`, `max_speed_mps`, `min_speed_for_risk_mps` |
+| Motion | `kf_process_noise_accel`, `kf_measurement_noise_m`, `max_speed_mps`, `min_speed_for_risk_mps`, `static_speed_mps` |
 | Proximity gates | `proximity_gate_m`, `min_closing_speed_mps`, `cpa_miss_distance_m` |
 | Lateral gates | `lat_limit_rear_end/merging/crossing/head_on` |
 | TTC gates | `ttc_threshold_by_pair` (per class pair) |
