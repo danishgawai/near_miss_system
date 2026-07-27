@@ -3,7 +3,14 @@
     "allow": [
       "PowerShell(python \"C:\\\\Users\\\\danis\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-danis-Downloads-near-miss-system-main-near-miss-system-main\\\\326123e0-6514-4769-bb84-4ade7c376f4c\\\\scratchpad\\\\test_math.py\")",
       "PowerShell(python -m pip install numpy --quiet --disable-pip-version-check 2>$null)",
-      "PowerShell(python -c \"import numpy; print\\(numpy.__version__\\)\")"
+      "PowerShell(python -c \"import numpy; print\\(numpy.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(.venv/Scripts/python.exe -c \"import json;d=json.load\\(open\\('near_miss_report.json'\\)\\);print\\('report generated_at:', d.get\\('generated_at'\\)\\);print\\('keys:', list\\(d.get\\('summary',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(.venv/Scripts/python.exe tests/test_ritsms_conflict.py)",
+      "Bash(.venv/Scripts/python.exe tests/test_ritsms_trajectory.py)",
+      "Bash(.venv/Scripts/python.exe -m ritsms.run --max-frames 300 --no-video)",
+      "Bash(.venv/Scripts/python.exe -m ritsms.run --max-frames 150)",
+      "Bash(nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv)"
     ]
   }
 }

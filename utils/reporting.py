@@ -50,8 +50,12 @@ class TelemetryLogger:
             self.writer = None
 
 class Reporter:
-    def __init__(self, fps: float):
+    def __init__(self, fps: float, calibration_confidence: str = "bev_only"):
         self.fps = fps
+        # BEV-only baseline: metric outputs (speed m/s, DRAC, Delta-V, *_M) are
+        # conditional. Recorded in the report header so downstream review knows
+        # which columns are acceptance-grade vs diagnostic.
+        self.calibration_confidence = calibration_confidence
         self.events = []
 
     def add(self, incidents):
@@ -62,20 +66,20 @@ class Reporter:
         if total == 0:
             return {"total_near_misses": 0}
 
-        risk_dist = defaultdict(int)
+        level_dist = defaultdict(int)
         type_dist = defaultdict(int)
-        scenario_dist = defaultdict(int)       # NEW
+        scenario_dist = defaultdict(int)
+        metric_dist = defaultdict(int)
         temporal = defaultdict(int)
         classes = defaultdict(int)
         frame_count = defaultdict(int)
         window = max(int(self.fps * 10), 1)
 
         for e in self.events:
-            risk_dist[e["risk"]] += 1
+            level_dist[e.get("level", "WARNING")] += 1
             type_dist[e["type"]] += 1
-            # NEW: track scenario distribution
-            scenario = e.get("scenario", "unknown")
-            scenario_dist[scenario] += 1
+            scenario_dist[e.get("scenario", "unknown")] += 1
+            metric_dist[e.get("metric_kind", "n/a")] += 1
 
             w = (e["frame"] // window) * 10
             temporal[f"{w}-{w+10}s"] += 1
@@ -88,9 +92,10 @@ class Reporter:
         peak = sorted(frame_count.items(), key=lambda x: -x[1])[:5]
         return {
             "total_near_misses": total,
-            "risk_distribution": dict(risk_dist),
+            "level_distribution": dict(level_dist),
             "type_distribution": dict(type_dist),
-            "scenario_distribution": dict(scenario_dist),   # NEW
+            "scenario_distribution": dict(scenario_dist),
+            "metric_distribution": dict(metric_dist),
             "temporal_analysis": dict(temporal),
             "involved_classes": dict(classes),
             "peak_frames": [{"frame": f, "count": c} for f, c in peak]
@@ -100,6 +105,8 @@ class Reporter:
         s = self.summary()
         payload = {
             "generated_at": datetime.now().isoformat(),
+            "calibration_confidence": self.calibration_confidence,
+            "metric_outputs_valid": self.calibration_confidence == "metric_validated",
             "summary": s,
             "incidents": self.events
         }
@@ -109,15 +116,14 @@ class Reporter:
 
 
 RISK_HEX = {
-    "Critical": "#d946ef",
-    "High": "#ff4444",
-    "Medium": "#ff8c00",
-    "Low": "#ffd700",
+    "CRITICAL": "#ff4444",
+    "WARNING": "#ff8c00",
+    "SAFE": "#4caf50",
 }
 
 
 def save_dashboard(summary: dict, path: str):
-    risk_dist = summary.get("risk_distribution", {})
+    risk_dist = summary.get("level_distribution", {})
     risk_labels = json.dumps(list(risk_dist.keys()))
     risk_values = json.dumps(list(risk_dist.values()))
     # Colours mapped BY LABEL — a fixed array silently mismatches when the
@@ -132,10 +138,9 @@ def save_dashboard(summary: dict, path: str):
     scen_values = json.dumps(list(summary.get("scenario_distribution", {}).values()))
 
     total = summary.get("total_near_misses", 0)
-    critical = risk_dist.get("Critical", 0)
-    high = risk_dist.get("High", 0)
-    medium = risk_dist.get("Medium", 0)
-    low = risk_dist.get("Low", 0)
+    critical = risk_dist.get("CRITICAL", 0)
+    warning = risk_dist.get("WARNING", 0)
+    safe = risk_dist.get("SAFE", 0)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -159,10 +164,9 @@ def save_dashboard(summary: dict, path: str):
 <h1>🚨 Near-Miss Incident Dashboard</h1>
 <div class="stats">
   <div class="card"><div class="num">{total}</div><div class="lbl">Total</div></div>
-  <div class="card"><div class="num" style="color:#d946ef">{critical}</div><div class="lbl">Collisions</div></div>
-  <div class="card"><div class="num" style="color:#ff4444">{high}</div><div class="lbl">High</div></div>
-  <div class="card"><div class="num" style="color:#ff8c00">{medium}</div><div class="lbl">Medium</div></div>
-  <div class="card"><div class="num" style="color:#ffd700">{low}</div><div class="lbl">Low</div></div>
+  <div class="card"><div class="num" style="color:#ff4444">{critical}</div><div class="lbl">Critical</div></div>
+  <div class="card"><div class="num" style="color:#ff8c00">{warning}</div><div class="lbl">Warning</div></div>
+  <div class="card"><div class="num" style="color:#4caf50">{safe}</div><div class="lbl">Safe</div></div>
 </div>
 <div class="charts">
   <div class="chart-box"><canvas id="c1"></canvas></div>

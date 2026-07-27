@@ -5,7 +5,7 @@ from typing import Dict, Set, List
 @dataclass
 class AppConfig:
     # I/O
-    source_stream: str = "traffic_light_video.mp4"
+    source_stream: str = "AD_intersection01.mp4.mp4"
     output_video_path: str = ""
     report_output_path: str = "near_miss_report.json"
     dashboard_output_path: str = "near_miss_dashboard.html"
@@ -13,10 +13,14 @@ class AppConfig:
     telemetry_csv_path: str = "near_miss_telemetry.csv"
 
     # Detection
-    model_path: str = "models/yolo26n_int8_openvino_model/"
+    # Domain-trained road-user detector (YOLOv8s, merger8). ~3.7x the recall of
+    # the generic COCO yolo26n on this intersection — the previous model was
+    # blind to the far half of the scene, dropping tracks and whole conflicts.
+    # NOTE its taxonomy differs from COCO (see class_mapping below).
+    model_path: str = "models/yolov8s_merger8_exp1_int8_openvino_model/"
     model_conf: float = 0.2
     model_device: str = "cpu"
-    filter_class_ids: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 5, 7])
+    filter_class_ids: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4, 5])
     warmup_frames: int = 10
 
     # Tracker
@@ -85,9 +89,13 @@ class AppConfig:
     # Object footprint priors — effective circular radius in metres.
     # Measured bottom-edge width (projected to BEV) is clipped to
     # [0.5, 2.0] × prior; the prior alone is the fallback.
+    # Effective circular radius ≈ half-WIDTH (RITSMS uses length×0.2 clamped
+    # [0.3, 1.5]). Half-width — not half-length — avoids same-direction
+    # adjacent-lane false positives in the TTC circle model. The runtime
+    # refines this from the measured, projected bottom-edge width per track.
     class_radius_m: Dict[str, float] = field(default_factory=lambda: {
-        "pedestrian": 0.35, "bicycle": 0.7, "motorcycle": 0.8,
-        "car": 1.4, "bus": 3.5, "truck": 3.0, "vehicle": 1.4,
+        "pedestrian": 0.35, "bicycle": 0.4, "motorcycle": 0.5,
+        "car": 0.9, "bus": 1.5, "truck": 1.5, "vehicle": 0.9,
     })
 
     # Lateral path-offset limits per scenario (metres)
@@ -143,13 +151,80 @@ class AppConfig:
     min_confidence_for_risk: float = 0.3       # detection score in [0, 1]
     direction_consistency_min: float = 0.25
 
+    # ── Detector backend ──────────────────────────────────────────────────
+    detector_backend: str = "yolo"     # "yolo" | "rfdetr" (future — same infer() contract)
+    post_nms_iou: float = 0.0          # >0 enables an explicit IoU de-dup pass pre-tracking
+
+    # ── Site / calibration (proposal §4.2) ────────────────────────────────
+    # ROI polygon + conflict zones live alongside the homography in this file.
+    site_config_path: str = "bev_config.json"
+    # BEV-only is the proposal baseline: TTC/PET are valid (scale-invariant /
+    # time-based); absolute speed, accel, DRAC, Delta-V and *_M columns are
+    # conditional until "metric_validated". A value in the site file overrides.
+    calibration_confidence_default: str = "bev_only"  # | "metric_validated"
+    fps_ceiling: float = 15.0          # effective-FPS cap for ingestion normalisation
+
+    # ── Conflict measures (proposal §4.5–4.6) ─────────────────────────────
+    ttc_screen_s: float = 3.0          # protocol TTC screening window
+    nfb3_window_s: float = 0.5         # NFb3 look-back window
+    nfb3_valid_fraction: float = 0.8   # ≥80% of window frames below ttc_screen_s
+    pet_gate_vv_s: float = 3.0         # PET screening — vehicle-vehicle
+    pet_gate_ped_s: float = 6.0        # PET screening — pedestrian/bicycle-vehicle
+    drac_gate_mps2: float = 0.5        # DRAC screening threshold (rear-end)
+    use_oriented_footprints: bool = False  # OBB/SAT TTC (needs stable heading)
+
+    # ── RITSMS-aligned conflict engine ────────────────────────────────────
+    # Severity levels are SAFE / WARNING / CRITICAL (proposal + RITSMS); only
+    # WARNING and CRITICAL are published.
+    min_publish_level: str = "WARNING"        # SAFE | WARNING | CRITICAL
+
+    # TTC levels + closed-form solver (WARNING gate = ttc_screen_s above)
+    ttc_critical_s: float = 1.5               # < this TTC -> CRITICAL
+    ttc_horizon_s: float = 3.0                # constant-velocity forecast horizon
+    ttc_min_rel_speed_mps: float = 0.5        # below this rel-speed the solve is skipped
+    ttc_closing_eps_m2s: float = 0.1          # r·v < -eps (used by DRAC 2D)
+    # A pair must be closing FASTER than this along the separation axis to be a
+    # TTC conflict. Rejects queued / crawling same-direction traffic whose
+    # footprint circles overlap without a genuine approach (dominant FP source).
+    ttc_min_closing_mps: float = 2.0
+    ttc_hysteresis_frames: int = 2            # consecutive CRITICAL frames before escalating
+    # NFb3 temporal confirmation (TTC only) uses nfb3_window_s / nfb3_valid_fraction
+    # above: window = round(fps*window_s); min = ceil(window*fraction).
+
+    # PET (spatial-grid arrival-gap) — RITSMS parameters
+    pet_cell_size_m: float = 1.5              # BEV occupancy-cell edge
+    # >= this relative bearing = genuine crossing course. 30° (RITSMS) admits
+    # near-parallel merges as false crossings in dense scenes; 60° keeps true
+    # crossing/opposing conflicts (merging/side-swipe stay with the TTC path).
+    pet_cross_heading_min_deg: float = 60.0
+    pet_critical_s: float = 1.5               # < this PET -> CRITICAL
+    pet_opposing_min_deg: float = 100.0       # >= this labels the event opposing_through
+    pet_direction_min_speed_mps: float = 1.0  # min speed for a reliable bearing
+    pet_max_gap_s: float = 6.0                # longest PET retained (ped window)
+
+    # Per-pair emit dedupe (reporting): one incident per pair per window.
+    nearmiss_dedupe_s: float = 3.0
+
+    # Delta-V severity bands (m/s) — CONDITIONAL in BEV-only mode
+    deltav_severe_rear_end_mps: float = 16.0
+    deltav_severe_opposing_mps: float = 8.27
+    deltav_severe_pedestrian_mps: float = 5.56
+
+    # Class masses (kg) — Appendix B, for Delta-V. "truck" defaults to the
+    # pickup/van figure (2250); override to 15000 for heavy commercial sites.
+    class_mass_kg: Dict[str, float] = field(default_factory=lambda: {
+        "pedestrian": 80.0, "bicycle": 90.0, "motorcycle": 250.0,
+        "car": 2050.0, "truck": 2250.0, "bus": 18000.0, "vehicle": 2050.0,
+    })
+
     # Runtime
     run_time_seconds: int = 3000
 
-    # Classes
+    # Classes — merger8 domain taxonomy (NOT COCO). Names feed class_radius_m,
+    # class_mass_kg, vulnerable_classes, heavy_classes (all keyed by name).
     class_mapping: Dict[int, str] = field(default_factory=lambda: {
-        0: "pedestrian", 1: "bicycle", 2: "car",
-        3: "motorcycle", 5: "bus", 7: "truck"
+        0: "car", 1: "bus", 2: "truck",
+        3: "motorcycle", 4: "pedestrian", 5: "bicycle"
     })
     vulnerable_classes: Set[str] = field(default_factory=lambda: {
         "pedestrian", "bicycle", "motorcycle"

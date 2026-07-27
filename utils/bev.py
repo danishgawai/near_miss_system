@@ -26,7 +26,29 @@ class BEVProjector:
         self.max_range_m = float(max_range_m)
         self.calibrated = False
         self._w_sign = 1.0
+        self._H_inv = None
         self._load(path)
+
+    @property
+    def H_inv(self):
+        if self._H_inv is None:
+            try:
+                self._H_inv = np.linalg.inv(self.H)
+            except np.linalg.LinAlgError:
+                self._H_inv = np.eye(3, dtype=np.float64)
+        return self._H_inv
+
+    def to_image_px(self, x_m: float, y_m: float):
+        """Inverse of to_bev_meters: BEV-metre point -> image pixel (or None if
+        it maps behind the camera). Used to overlay BEV forecasts on the frame."""
+        bx, by = x_m * self.ppm, y_m * self.ppm
+        v = self.H_inv @ np.array([bx, by, 1.0], dtype=np.float64)
+        if abs(v[2]) < 1e-9:
+            return None
+        px, py = v[0] / v[2], v[1] / v[2]
+        if not (np.isfinite(px) and np.isfinite(py)):
+            return None
+        return (float(px), float(py))
 
     def _load(self, path: str):
         if not os.path.isfile(path):
@@ -43,6 +65,7 @@ class BEVProjector:
             if H.shape != (3, 3) or abs(np.linalg.det(H)) < 1e-12:
                 raise ValueError("homography_matrix must be an invertible 3x3 matrix")
             self.H = H
+            self._H_inv = None
             ppm = float(cfg.get("pixels_per_meter", self.ppm))
             if ppm <= 0:
                 raise ValueError(f"pixels_per_meter must be > 0, got {ppm}")

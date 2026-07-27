@@ -22,17 +22,17 @@ from utils.yolo_infer import YOLO_Inference
 from tracker.byte_tracker import BYTETracker
 
 
-source_stream = "vehicle_intersection.mp4"
+source_stream = "AD_intersection01.mp4.mp4"
 maxDisappeared = 20
 ROI = [[0.0,0.0],[1.0,0.0],[1.0,1.0],[0.0,1.0]]
 # FPS = 3
 
 # Initialize detector with explicit device
 detector = YOLO_Inference(
-    model_path="models/yolo26n_int8_openvino_model",
-    conf_thres=0.5,
+    model_path="models/yolov8s_merger8_exp1_openvino_model",
+    conf_thres=0.25,
     device="cpu", # OpenVINO usually runs on CPU in Colab unless using an iGPU
-    filter_class_ids=[2, 3, 5, 7]  # Filter for Car, Bus, Truck, Motorcycle
+    filter_class_ids=[0, 1, 2, 3, 5, 7]  # Filter for Car, Bus, Truck, Motorcycle
 )
 
 print("Warming up the OpenVINO model for 10 frames to optimize compilation...")
@@ -47,6 +47,11 @@ logging.info("Starting processing on RTSP")
 def plot_detections(frame, detections):
     if detections:
         for (x1, y1, x2, y2, conf_percent, cls_id) in detections:
+            x1 = int(x1)
+            x2 = int(x2)
+            y1 = int(y1)
+            y2 = int(y2)
+            conf_percent = int(conf_percent*100)
             label = f"ClsID {cls_id}: {conf_percent}%"
             cv2.rectangle(frame, (x1, y1), (x2, y2), (200, 0, 100), 2)
             font, font_scale, thickness = cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1
@@ -84,6 +89,8 @@ def predict_on_RTSP():
     while True:
         ret, frame = cap.read()
         if not ret:
+            cap.release()
+            out.release()
             break
 
         loop_start_time = time.time()
@@ -122,11 +129,12 @@ def predict_on_RTSP():
             cv2.polylines(annotated_frame, [points], isClosed=False, color=(255, 0, 0), thickness=2)
 
         # Overlay detections
-        annotated_frame = plot_detections(annotated_frame, detections)
+        annotated_frame = plot_detections(annotated_frame, boxes)
+        # cv2.imwrite(f"annotated_frame.jpg", annotated_frame)  # Save each frame as an image
         out.write(annotated_frame)
 
         # Stats
-        num_dets_frame = len(detections)
+        num_dets_frame = len(boxes)
         total_dets += num_dets_frame
         loop_time = time.time() - loop_start_time
         total_time += loop_time
@@ -147,6 +155,8 @@ if __name__ == "__main__":
         predict_on_RTSP()
     except KeyboardInterrupt:
         print("Interrupted by user, saving video...")
+        cap.release()
+        out.release()
         sys.exit(0)
     except Exception as e:
         print(f"Code crashed unexpectedly: {e}")

@@ -12,6 +12,7 @@ from collections import defaultdict, deque
 
 from config import AppConfig
 from utils.bev import BEVProjector
+from utils.site import SiteConfig
 from utils.motion import MotionEstimator, TrackState
 from utils.track_manager import TrackerManager
 from utils.near_miss import NearMissEngine
@@ -79,6 +80,7 @@ def run():
     tracker = TrackerManager(cfg.track_thresh, cfg.track_buffer, cfg.match_thresh, fps)
     projector = BEVProjector(cfg.bev_config_path, cfg.default_pixels_per_meter,
                              cfg.bev_max_range_m)
+    site = SiteConfig(cfg.site_config_path, cfg.calibration_confidence_default)
     motion = MotionEstimator(
         fps,
         process_noise_accel=cfg.kf_process_noise_accel,
@@ -87,8 +89,8 @@ def run():
         outlier_reset_frames=cfg.kf_outlier_reset_frames,
         max_speed_mps=cfg.max_speed_mps,
     )
-    risk_engine = NearMissEngine(cfg)
-    reporter = Reporter(fps)
+    risk_engine = NearMissEngine(cfg, fps, site)
+    reporter = Reporter(fps, site.calibration_confidence)
     telemetry = TelemetryLogger(cfg.telemetry_csv_path)
     telemetry.open()
 
@@ -117,6 +119,13 @@ def run():
             except Exception as e:
                 logging.error(f"Detection error @ frame {frame_idx}: {e}")
                 boxes = []
+
+            # 1b) ROI gate — when an ROI is configured, only detections whose
+            # ground-contact point (bbox bottom-centre) falls inside it are
+            # processed; "full frame" mode leaves this a no-op.
+            if site.roi_enabled:
+                boxes = [b for b in boxes
+                         if site.point_in_image_roi(0.5 * (b[0] + b[2]), b[3])]
 
             # 2) Track
             raw = tracker.update(boxes)
@@ -200,9 +209,10 @@ def run():
             )
             writer.write(annotated)
 
-            collisions = [x for x in incidents if x.get("risk") == "Critical"]
-            high = [x for x in incidents if x.get("risk") == "High"]
-            if collisions or high:
+            collisions = [x for x in incidents if x.get("type") == "Collision"]
+            critical = [x for x in incidents if x.get("level") == "CRITICAL"]
+            warning = [x for x in incidents if x.get("level") == "WARNING"]
+            if critical or warning:
                 os.makedirs(cfg.high_risk_frame_dir, exist_ok=True)
                 snap = os.path.join(cfg.high_risk_frame_dir, f"frame_{frame_idx:06d}.jpg")
                 cv2.imwrite(snap, annotated)
@@ -213,9 +223,13 @@ def run():
                             f"impact={c['impact_rel_speed_kmh']} km/h "
                             f"evidence={c['evidence']} → {snap}"
                         )
+                elif critical:
+                    logging.critical(
+                        f"CRITICAL frame {frame_idx}: {len(critical)} conflict(s) → {snap}"
+                    )
                 else:
                     logging.warning(
-                        f"HIGH RISK frame {frame_idx}: {len(high)} incidents → {snap}"
+                        f"WARNING frame {frame_idx}: {len(warning)} conflict(s) → {snap}"
                     )
 
             if frame_idx % 30 == 0 or incidents:

@@ -19,10 +19,10 @@
 <body>
 <h1>🚨 Near-Miss Incident Dashboard</h1>
 <div class="stats">
-  <div class="card"><div class="num">13</div><div class="lbl">Total</div></div>
-  <div class="card"><div class="num" style="color:#ff4444">6</div><div class="lbl">High</div></div>
-  <div class="card"><div class="num" style="color:#ff8c00">6</div><div class="lbl">Medium</div></div>
-  <div class="card"><div class="num" style="color:#ffd700">1</div><div class="lbl">Low</div></div>
+  <div class="card"><div class="num">231</div><div class="lbl">Total</div></div>
+  <div class="card"><div class="num" style="color:#ff4444">93</div><div class="lbl">Critical</div></div>
+  <div class="card"><div class="num" style="color:#ff8c00">138</div><div class="lbl">Warning</div></div>
+  <div class="card"><div class="num" style="color:#4caf50">0</div><div class="lbl">Safe</div></div>
 </div>
 <div class="charts">
   <div class="chart-box"><canvas id="c1"></canvas></div>
@@ -33,22 +33,22 @@
 <script>
 new Chart(document.getElementById('c1'),{
   type:'doughnut',
-  data:{labels:["Medium", "High", "Low"],datasets:[{data:[6, 6, 1],backgroundColor:['#ff4444','#ff8c00','#ffd700','#4caf50']}]},
+  data:{labels:["WARNING", "CRITICAL"],datasets:[{data:[138, 93],backgroundColor:["#ff8c00", "#ff4444"]}]},
   options:{plugins:{title:{display:true,text:'Risk Distribution',color:'#eee'}}}
 });
 new Chart(document.getElementById('c2'),{
   type:'bar',
-  data:{labels:["0-10s"],datasets:[{label:'Incidents',data:[13],backgroundColor:'#e94560'}]},
+  data:{labels:["0-10s", "10-20s", "20-30s", "30-40s", "40-50s", "100-110s", "110-120s", "120-130s", "130-140s", "150-160s", "160-170s", "170-180s", "180-190s", "190-200s", "200-210s", "210-220s", "220-230s", "270-280s", "280-290s"],datasets:[{label:'Incidents',data:[15, 15, 17, 25, 6, 1, 2, 1, 6, 2, 7, 38, 81, 1, 2, 6, 2, 2, 2],backgroundColor:'#e94560'}]},
   options:{plugins:{title:{display:true,text:'Temporal Analysis',color:'#eee'}},scales:{y:{ticks:{color:'#aaa'}},x:{ticks:{color:'#aaa'}}}}
 });
 new Chart(document.getElementById('c3'),{
   type:'bar',
-  data:{labels:["car", "truck"],datasets:[{label:'Count',data:[21, 1],backgroundColor:'#0f3460'}]},
+  data:{labels:["car", "truck", "bus", "pedestrian", "motorcycle"],datasets:[{label:'Count',data:[427, 4, 11, 12, 6],backgroundColor:'#0f3460'}]},
   options:{indexAxis:'y',plugins:{title:{display:true,text:'Object Classes Involved',color:'#eee'}},scales:{x:{ticks:{color:'#aaa'}},y:{ticks:{color:'#aaa'}}}}
 });
 new Chart(document.getElementById('c4'),{
   type:'doughnut',
-  data:{labels:["hard_brake", "crossing", "head_on", "swerve"],datasets:[{data:[3, 7, 2, 1],backgroundColor:['#0f3460','#e94560','#a855f7','#f59e0b','#10b981']}]},
+  data:{labels:["head_on", "crossing", "merging", "collision", "rear_end", "opposing_through", "swerve"],datasets:[{data:[5, 163, 33, 4, 21, 3, 2],backgroundColor:['#0f3460','#e94560','#a855f7','#f59e0b','#10b981']}]},
   options:{plugins:{title:{display:true,text:'Scenario Types',color:'#eee'}}}
 });
 </script>

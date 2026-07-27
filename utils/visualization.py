@@ -16,35 +16,33 @@ from typing import Dict, List
 from collections import deque
 
 
-# Shared palette — used by BOTH bounding boxes AND overlay text
+# Shared palette — SAFE / WARNING / CRITICAL (RITSMS-aligned levels).
 RISK_COLORS = {
-    "Critical": (255, 0,   255),  # magenta — confirmed collision
-    "High":     (0,   0,   255),  # red
-    "Medium":   (0,   165, 255),  # orange
-    "Low":      (0,   200, 80),   # green
+    "CRITICAL": (0,   0,   255),  # red — collision / imminent
+    "WARNING":  (0,   165, 255),  # orange
+    "SAFE":     (0,   200, 80),   # green (not usually drawn; published >= WARNING)
 }
 
-# Fallback when no risk level is assigned (neutral track)
+# Fallback when no level is assigned (neutral track)
 _DEFAULT_COLOR = (180, 180, 180)
 
-# Scenario accent — only used for single-object events (hard_brake, swerve)
-# which have no risk-level colour of their own
+# Scenario accent fallback for events that somehow carry no level.
 SCENARIO_COLORS = {
     "hard_brake": (0,   200, 255),   # cyan
     "swerve":     (255, 100, 0),     # blue-orange
 }
 
+_LEVEL_PRIORITY = {"CRITICAL": 3, "WARNING": 2, "SAFE": 1}
+
 
 def build_risk_map(incidents: List[dict]) -> Dict[int, str]:
-    """Return a dict of track_id → highest risk label for the current frame."""
-    priority = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+    """Return a dict of track_id → highest level label for the current frame."""
     out: Dict[int, str] = {}
     for inc in incidents:
-        risk = inc.get("risk", "Low")
+        level = inc.get("level", "WARNING")
         for id_key, actor_key in (("actor_1_id", "actor_1"), ("actor_2_id", "actor_2")):
             tid = inc.get(id_key)
             if tid is None:
-                # Fallback for incidents lacking explicit ids: parse the label
                 actor = inc.get(actor_key)
                 if actor and "ID:" in actor:
                     try:
@@ -53,20 +51,16 @@ def build_risk_map(incidents: List[dict]) -> Dict[int, str]:
                         continue
             if tid is None:
                 continue
-            if priority.get(risk, 0) > priority.get(out.get(tid, ""), 0):
-                out[tid] = risk
+            if _LEVEL_PRIORITY.get(level, 0) > _LEVEL_PRIORITY.get(out.get(tid, ""), 0):
+                out[tid] = level
     return out
 
 
 def _incident_color(inc: dict) -> tuple:
-    """
-    Return the BGR colour to use for an incident overlay line.
-    Always derived from RISK_COLORS so it matches the bounding box colour.
-    Falls back to SCENARIO_COLORS for single-object events that carry no RI.
-    """
-    risk = inc.get("risk")
-    if risk in RISK_COLORS:
-        return RISK_COLORS[risk]
+    """BGR colour for an incident overlay line, matching the bounding box."""
+    level = inc.get("level")
+    if level in RISK_COLORS:
+        return RISK_COLORS[level]
     scenario = inc.get("scenario", "")
     return SCENARIO_COLORS.get(scenario, (255, 255, 255))
 
@@ -131,16 +125,14 @@ def draw_frame(
         color = _incident_color(inc)          # ← always from RISK_COLORS
 
         # Build label
-        txt = f"[{inc.get('risk','?')}] {inc['type']}"
-
-        ri = inc.get("risk_index")
-        if ri is not None:
-            txt += f"  RI:{ri:.2f}"
+        txt = f"[{inc.get('level','?')}] {inc['type']}"
 
         if inc.get("ttc_s") is not None:
             txt += f"  TTC:{inc['ttc_s']}s"
+        if inc.get("pet_s") is not None:
+            txt += f"  PET:{inc['pet_s']}s"
 
-        # edge_distance_m is the new field; fall back to centre_distance_m
+        # edge_distance_m appears on collision events; fall back to centre.
         dist = inc.get("edge_distance_m") or inc.get("centre_distance_m")
         if dist is not None:
             txt += f"  D:{dist}m"
