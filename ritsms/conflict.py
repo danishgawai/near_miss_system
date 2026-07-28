@@ -313,7 +313,51 @@ class ConflictEngine:
                 r = pb - pa
                 dist = max(centre, 1e-6)
                 closing = float(np.dot(va - vb, r / dist))
-                angle = math.degrees(M.interaction_angle(va, vb))
+
+                # ---- motion state (measures doc: an interaction is a pair of
+                # MOVING objects). A vehicle stopped at a signal is a legitimate
+                # conflict TARGET (rear-end into a queue is a real, common
+                # conflict) but not an initiator, and at ~0 speed its velocity
+                # direction is pure noise — which fabricated "head_on" events at
+                # IP33B against vehicles stopped on the OPPOSITE carriageway.
+                a_moving = trk_a.speed >= cfg.min_moving_speed_mps
+                b_moving = trk_b.speed >= cfg.min_moving_speed_mps
+                if not (a_moving or b_moving):
+                    continue                      # both stopped — no interaction
+                stationary_target = not (a_moving and b_moving)
+                if stationary_target:
+                    # The mover must genuinely be on course to hit the stopped
+                    # vehicle: ahead of it and within a lateral corridor. This is
+                    # what separates "approaching the back of my own queue"
+                    # (a real rear-end) from "driving past a queue stopped on the
+                    # opposite lane" (not a conflict).
+                    if a_moving:
+                        mover, target = trk_a, trk_b
+                        mv, mp, tp = va, pa, pb
+                    else:
+                        mover, target = trk_b, trk_a
+                        mv, mp, tp = vb, pb, pa
+                    sp = float(np.linalg.norm(mv))
+                    if sp < 1e-6:
+                        continue
+                    h = mv / sp
+                    rel = tp - mp
+                    lon = float(np.dot(rel, h))
+                    lat = abs(float(rel[0] * h[1] - rel[1] * h[0]))
+                    if lon <= 0.0 or lat > cfg.stationary_lat_corridor_m:
+                        continue
+                    # Classify using the stopped vehicle's heading from BEFORE it
+                    # stopped (it kept the direction it approached the signal in),
+                    # never its ~0-speed noise direction. Falls back to the
+                    # mover's own axis when no moving heading was ever observed.
+                    tgt_h = target.last_moving_heading_deg
+                    if tgt_h is None:
+                        angle = 0.0
+                    else:
+                        angle = _rel_angle_deg(math.degrees(math.atan2(h[1], h[0])), tgt_h)
+                else:
+                    angle = math.degrees(M.interaction_angle(va, vb))
+
                 encounter, governing = self._encounter(trk_a, trk_b, angle)
                 ped = self._ped(trk_a.cls_name) or self._ped(trk_b.cls_name)
 

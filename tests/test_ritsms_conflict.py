@@ -126,6 +126,55 @@ def test_engine_ignores_slow_queue():
     assert inc == [], inc
 
 
+def test_engine_ignores_both_stopped():
+    # Two vehicles both stopped at the signal must never interact
+    # (measures doc: an interaction is a pair of MOVING objects).
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {1: _ftrack(1, (0, 0), (0.1, 0), cfg), 2: _ftrack(2, (5, 0), (0.05, 0), cfg)}
+    assert _drive(eng, tracks, frames=8) == []
+
+
+def test_engine_ignores_passing_queue_on_opposite_lane():
+    # The IP33B false positive: driving past vehicles queued at the signal on
+    # the OPPOSITE carriageway must not raise a conflict.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    stopped = _ftrack(2, (10, 6.0), (-0.05, 0), cfg)      # opposite lane, 6 m across
+    stopped.last_moving_heading_deg = 180.0               # arrived facing -x
+    tracks = {1: _ftrack(1, (0, 0), (8, 0), cfg), 2: stopped}
+    assert _drive(eng, tracks, frames=8) == []
+
+
+def test_engine_keeps_rear_end_into_signal_queue():
+    # ...but approaching the back of a queue IN MY OWN LANE is a real conflict
+    # and must still be reported.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    stopped = _ftrack(2, (14, 0.2), (0.05, 0), cfg)       # stopped directly ahead
+    stopped.last_moving_heading_deg = 0.0                 # same direction as mover
+    tracks = {1: _ftrack(1, (0, 0), (8, 0), cfg), 2: stopped}
+    inc = _drive(eng, tracks, frames=8)
+    assert len(inc) >= 1, "rear-end into a signal queue must still fire"
+    assert inc[0]["encounter_type"].endswith("rear_end")
+
+
+def test_stopped_vehicle_noise_heading_cannot_fabricate_head_on():
+    # A stopped vehicle's ~0-speed direction is noise. Even when that noise
+    # points "against" the mover, the retained pre-stop heading (same direction,
+    # i.e. a queue in the same lane) must classify it as rear_end, not head_on.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    stopped = _ftrack(2, (14, 0.2), (-0.15, 0.1), cfg)    # noise points backwards
+    stopped.last_moving_heading_deg = 0.0                 # truly same direction
+    tracks = {1: _ftrack(1, (0, 0), (8, 0), cfg), 2: stopped}
+    inc = _drive(eng, tracks, frames=8)
+    assert inc, "should still detect the in-lane approach"
+    for e in inc:
+        assert "head_on" not in e["encounter_type"], e
+        assert e["encounter_type"].endswith("rear_end"), e
+
+
 def test_engine_ignores_far_apart():
     cfg = Config()
     eng = ConflictEngine(cfg, fps=10.0, site=None)

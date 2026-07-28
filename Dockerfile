@@ -15,6 +15,7 @@ RUN apt-get -y update && apt-get upgrade -y && apt-get install -y \
 ADD . /app
 WORKDIR /app
 RUN pip3 install -r requirements.txt
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 
 # Headless BEV calibration UI (bev_web_calibrator.py). Forward this port:
 #   docker run -p 8000:8000 ...   then open http://localhost:8000

@@ -55,6 +55,10 @@ class TrackTrajectory:
     speed: float = 0.0                            # m/s (BEV units)
     acc: float = 0.0                              # m/s^2 (signed)
     heading_deg: float = 0.0
+    # Last heading observed while the track was genuinely moving. A vehicle
+    # waiting at a signal keeps the heading it had on approach, so encounter
+    # typing stays correct instead of using the ~0-speed noise direction.
+    last_moving_heading_deg: Optional[float] = None
     yaw_rate: float = 0.0                         # rad/s
     direction_consistency: float = 0.0
     length_m: float = 4.5
@@ -212,6 +216,9 @@ class TrackTrajectory:
                 self._unwrapped_head += d
             self.heading_deg = math.degrees(raw)
             self._head_hist.append((t, self._unwrapped_head))
+            # Remember it while the motion is fast enough to be trustworthy.
+            if self.speed >= getattr(self.cfg, "min_moving_speed_mps", 1.0):
+                self.last_moving_heading_deg = self.heading_deg
         self._speed_hist.append((t, self.speed))
         self.acc = _lsq_slope([s[0] for s in self._speed_hist], [s[1] for s in self._speed_hist])
         if self.speed > 1.0 and len(self._head_hist) >= 3:

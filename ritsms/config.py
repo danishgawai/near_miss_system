@@ -91,6 +91,20 @@ class Config:
     proximity_gate_m: float = 25.0        # coarse pair pre-filter (centre distance)
     footprint_buffer_m: float = 0.3       # safety margin added to footprints
 
+    # Motion state. The measures doc defines an interaction as "a pair of MOVING
+    # objects simultaneously present in a scene", so a stopped vehicle is a
+    # conflict TARGET but not an initiator. Rear-end into a signal queue is a
+    # real and common conflict, so stopped vehicles are NOT excluded outright —
+    # but at ~0 speed their velocity direction is pure noise, which at site
+    # IP33B fabricated conflicts (incl. every "head_on") against vehicles
+    # queued at the signal on the OPPOSITE carriageway.
+    min_moving_speed_mps: float = 1.0     # below this a track is "stopped"
+    # A stopped vehicle only counts as a target when the mover is genuinely on
+    # course to hit it: ahead, and within this lateral corridor of its path.
+    # Separates "approaching the back of my own queue" (real rear-end) from
+    # "passing a queue stopped on the opposite lane" (not a conflict).
+    stationary_lat_corridor_m: float = 2.5
+
     # TTC levels + solver
     ttc_warning_s: float = 3.0            # protocol screening window
     ttc_critical_s: float = 1.5
