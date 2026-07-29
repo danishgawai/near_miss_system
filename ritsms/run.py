@@ -26,6 +26,7 @@ from ritsms.track import Tracker, TrackQualityMonitor
 from ritsms.trajectory import TrackTrajectory
 from ritsms.conflict import ConflictEngine
 from ritsms.outputs import TrajectoryWriter, ConflictWriter, Reporter
+from ritsms.calibration_check import check_config_match, CalibrationHealth, log_report
 from utils.bev import BEVProjector
 from utils.site import SiteConfig
 
@@ -93,11 +94,28 @@ def _draw(frame, tracks, level_of, active, cfg, frame_idx, total, fps, site=None
     return frame
 
 
-def run(cfg: Config, max_frames=None):
+def run(cfg: Config, max_frames=None, verify_only=False):
     os.makedirs(cfg.output_dir, exist_ok=True)
     src = FrameSource(cfg.source, cfg.fps_ceiling)
     cfg.frame_width, cfg.frame_height = src.width, src.height
     fps = src.fps_eff
+
+    # ---- Guard 1: does the site config actually belong to this video? ----
+    problems = check_config_match(cfg.site_config_path, cfg.source, src.width, src.height)
+    if problems:
+        for p in problems:
+            logger.error("CALIBRATION MISMATCH: %s", p)
+        logger.error("Recalibrate for this camera:  python bev_web_calibrator.py "
+                     "--video %s --config bev_config_<SITE>.json", cfg.source)
+        if cfg.strict_calibration:
+            src.release()
+            raise SystemExit(
+                "Aborting: the site config does not match the video being processed. "
+                "Conflict measures would be geometrically invalid. Recalibrate, or pass "
+                "--allow-config-mismatch to override deliberately."
+            )
+        logger.warning("Continuing despite mismatch (strict_calibration disabled) — "
+                       "treat all metric output as invalid.")
 
     detector = Detector(cfg)
     logger.info("Warming detector (%d frames)...", cfg.warmup_frames)
@@ -109,6 +127,19 @@ def run(cfg: Config, max_frames=None):
     engine = ConflictEngine(cfg, fps, site)
     qmon = TrackQualityMonitor(cfg)
     reporter = Reporter(cfg, site, fps)
+    health = CalibrationHealth(
+        stopped_speed_mps=cfg.calib_stopped_speed_mps,
+        wander_warn_m=cfg.calib_wander_warn_m,
+        wander_fail_m=cfg.calib_wander_fail_m,
+        min_scene_span_m=cfg.calib_min_scene_span_m,
+        max_scene_span_m=cfg.calib_max_scene_span_m,
+        max_speed_mps=cfg.max_speed_mps,
+    )
+
+    # In verify mode nothing is written: this is a calibration check, not a run.
+    if verify_only:
+        cfg.write_video = False
+        cfg.write_traces = False
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     traj_w = TrajectoryWriter(os.path.join(cfg.output_dir, f"trajectory_{ts}.csv"), site.metric_confident)
@@ -165,6 +196,7 @@ def run(cfg: Config, max_frames=None):
             positions = {tid: t.position_m for tid, t in tracks.items() if t.ready}
             jumps = sum(t.jump_count for t in tracks.values())
             qmon.update(fi, positions, jump_delta=0)
+            health.observe(tracks)
 
             incidents = engine.evaluate(fi, pkt.capture_ts_ms, None, tracks, pkt.t_s)
             n_conf += len(incidents)
@@ -195,6 +227,20 @@ def run(cfg: Config, max_frames=None):
         traj_w.close()
         conf_w.close()
 
+    # ---- Guard 2: empirical calibration health from what we just processed ----
+    hrep = health.report()
+    log_report(hrep)
+
+    if verify_only:
+        # Clean up the empty artefacts a verify pass shouldn't leave behind.
+        for p in (os.path.join(cfg.output_dir, f"trajectory_{ts}.csv"),
+                  os.path.join(cfg.output_dir, f"conflicts_{ts}.csv")):
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+        return hrep
+
     tq = qmon.summary()
     tq["jump_jitter_events"] = sum(t.jump_count for t in tracks.values())  # residual live tracks
     s = reporter.save(
@@ -205,6 +251,9 @@ def run(cfg: Config, max_frames=None):
     )
     logger.info("DONE. conflicts=%d  outputs in %s/", s["total_conflicts"], cfg.output_dir)
     logger.info("levels=%s governing=%s", s["level_distribution"], s["governing_measure"])
+    if hrep["overall"] == "FAIL":
+        logger.error("NOTE: calibration health FAILED for this run — the conflict numbers "
+                     "above are not trustworthy. See the calibration health block.")
     return s
 
 
@@ -216,6 +265,15 @@ def main():
     ap.add_argument("--device", default=None, help='"cpu" | "cuda" | "0" (GPU needs a CUDA torch)')
     ap.add_argument("--model", default=None, help="detector path; use the .pt for GPU")
     ap.add_argument("--half", action="store_true", help="FP16 (Pascal+ GPUs only)")
+    ap.add_argument("--site-config", default=None,
+                    help="per-site bev config (homography + ROI), e.g. bev_config_IP33B.json")
+    ap.add_argument("--site-id", default=None, help="site identifier written to the outputs")
+    ap.add_argument("--verify-calibration", action="store_true",
+                    help="run a short segment and only report calibration health; writes nothing")
+    ap.add_argument("--verify-frames", type=int, default=600,
+                    help="frames to use for --verify-calibration (default 600)")
+    ap.add_argument("--allow-config-mismatch", action="store_true",
+                    help="proceed even if the site config doesn't match the source (unsafe)")
     args = ap.parse_args()
     cfg = Config()
     if args.source:
@@ -228,6 +286,20 @@ def main():
         cfg.model_path = args.model
     if args.half:
         cfg.model_half = True
+    if args.site_config:
+        cfg.site_config_path = args.site_config
+    if args.site_id:
+        cfg.site_id = args.site_id
+    if args.allow_config_mismatch:
+        cfg.strict_calibration = False
+
+    if args.verify_calibration:
+        # A verification pass must not be blocked by the static guard — reporting
+        # the empirical health is exactly the point.
+        cfg.strict_calibration = False
+        rep = run(cfg, max_frames=args.verify_frames, verify_only=True)
+        raise SystemExit(0 if rep["overall"] in ("PASS", "WARN") else 1)
+
     run(cfg, max_frames=args.max_frames)
 
 
