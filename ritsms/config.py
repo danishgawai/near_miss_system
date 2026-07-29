@@ -13,8 +13,8 @@ from typing import Dict, List, Set
 @dataclass
 class Config:
     # ── Identity / IO ─────────────────────────────────────────────────────
-    site_id: str = "IP86"
-    source: str = "AD_intersection01.mp4.mp4"
+    site_id: str = "IP33B"
+    source: str = "IP33B_003.mp4"
     site_config_path: str = "bev_config.json"       # homography + ROI + zones
     output_dir: str = "ritsms_out"
     write_video: bool = True
@@ -25,8 +25,8 @@ class Config:
     # looking but geometrically wrong output, so it fails silently. These guards
     # make it fail loudly instead.
     strict_calibration: bool = True   # abort when the site config doesn't match the source
-    # Empirical health thresholds — a STOPPED vehicle must not move in the BEV
-    # plane. A mis-calibrated site measured 6.9 m median / 44.2 m max wander.
+    # Coarse sanity thresholds only (see ritsms/calibration_check.py for why the
+    # wander metric is informational and cannot validate a calibration).
     calib_stopped_speed_mps: float = 0.5   # below this a track is "stopped"
     calib_wander_warn_m: float = 2.0
     calib_wander_fail_m: float = 4.0
@@ -103,7 +103,6 @@ class Config:
     # ── §4.5 Conflict extraction ──────────────────────────────────────────
     proximity_gate_m: float = 25.0        # coarse pair pre-filter (centre distance)
     footprint_buffer_m: float = 0.3       # safety margin added to footprints
-
     # Motion state. The measures doc defines an interaction as "a pair of MOVING
     # objects simultaneously present in a scene", so a stopped vehicle is a
     # conflict TARGET but not an initiator. Rear-end into a signal queue is a
@@ -117,6 +116,16 @@ class Config:
     # Separates "approaching the back of my own queue" (real rear-end) from
     # "passing a queue stopped on the opposite lane" (not a conflict).
     stationary_lat_corridor_m: float = 2.5
+
+    # Same-direction pairs: lane discipline. The rear-end TTC formula is defined
+    # for vehicles "on the same line of travel" (Hayward 1972), so an
+    # adjacent-lane pair violates its premise and must not be reported as a
+    # rear-end. Measured at IP33B: 60% of reported rear-ends were >=2 m apart
+    # laterally (i.e. a different lane), including 18 of the 23 TTC=0 events.
+    lat_limit_rear_end_m: float = 2.0        # within this = same line of travel
+    # Beyond that limit the pair is only a conflict if it is actually converging
+    # laterally (a lane change / side-swipe). Steady parallel travel is not.
+    sideswipe_min_lat_closing_mps: float = 0.3
 
     # TTC levels + solver
     ttc_warning_s: float = 3.0            # protocol screening window

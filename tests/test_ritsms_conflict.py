@@ -175,6 +175,58 @@ def test_stopped_vehicle_noise_heading_cannot_fabricate_head_on():
         assert e["encounter_type"].endswith("rear_end"), e
 
 
+def test_adjacent_lane_parallel_travel_is_not_a_conflict():
+    # The IP33B symptom: a vehicle in the ADJACENT lane, travelling parallel,
+    # must not be reported as a rear-end. The rear-end TTC formula assumes both
+    # users are on the same line of travel.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {
+        1: _ftrack(1, (0, 0), (10, 0), cfg),          # fast, lane 1
+        2: _ftrack(2, (12, 3.2), (6, 0), cfg),        # ahead but a lane over, parallel
+    }
+    assert _drive(eng, tracks, frames=8) == []
+
+
+def test_adjacent_lane_converging_is_a_sideswipe():
+    # ...but if it is actually drifting across into the lane, that IS a conflict
+    # and must be classified as a lane change / side-swipe, not a rear-end.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {
+        1: _ftrack(1, (0, 0), (10, 0), cfg),
+        2: _ftrack(2, (12, 3.2), (6, -1.2), cfg),     # closing laterally
+    }
+    inc = _drive(eng, tracks, frames=8)
+    assert inc, "a converging adjacent-lane pair should be reported"
+    assert all("lane_change_merge" in e["encounter_type"] for e in inc), inc
+
+
+def test_same_lane_rear_end_still_fires():
+    # Regression guard: the lane-discipline gate must not suppress genuine
+    # same-lane rear-end conflicts.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {
+        1: _ftrack(1, (0, 0), (10, 0), cfg),
+        2: _ftrack(2, (14, 0.3), (4, 0), cfg),        # same lane, closing
+    }
+    inc = _drive(eng, tracks, frames=8)
+    assert inc, "same-lane rear-end must still fire"
+    assert inc[0]["encounter_type"].endswith("rear_end"), inc
+
+
+def test_footprint_center_offsets_from_near_face():
+    # The tracked point is the near-face ground contact; the footprint centre
+    # must sit half a vehicle length further from the camera.
+    cfg = Config()
+    t = _ftrack(1, (0, 0), (5, 0), cfg)
+    assert np.allclose(t.footprint_center(), t.position_m)   # no away_dir yet
+    t.away_dir = np.array([1.0, 0.0])
+    off = t.footprint_center() - t.position_m
+    assert abs(float(off[0]) - t.length_m / 2.0) < 1e-9 and abs(float(off[1])) < 1e-9
+
+
 def test_engine_ignores_far_apart():
     cfg = Config()
     eng = ConflictEngine(cfg, fps=10.0, site=None)
