@@ -13,8 +13,8 @@ from typing import Dict, List, Set
 @dataclass
 class Config:
     # ── Identity / IO ─────────────────────────────────────────────────────
-    site_id: str = "IP33B"
-    source: str = "IP33B_003.mp4"
+    site_id: str = "IP86B"
+    source: str = "IP86B_001.mp4"
     site_config_path: str = "bev_config.json"       # homography + ROI + zones
     output_dir: str = "ritsms_out"
     write_video: bool = True
@@ -125,7 +125,12 @@ class Config:
     lat_limit_rear_end_m: float = 2.0        # within this = same line of travel
     # Beyond that limit the pair is only a conflict if it is actually converging
     # laterally (a lane change / side-swipe). Steady parallel travel is not.
-    sideswipe_min_lat_closing_mps: float = 0.3
+    # MEASURED at IP86B: a real lane change crosses ~3.5 m in 3-4 s = ~1.0 m/s
+    # lateral, whereas a mere 7 deg heading error at 5 m/s fabricates 0.61 m/s.
+    # At 0.3 the median flagged event was 0.72 m/s - barely above that noise
+    # floor - so parallel travel with tracking jitter was being reported as a
+    # side-swipe. 1.0 keeps genuine lane changes and rejects the jitter.
+    sideswipe_min_lat_closing_mps: float = 1.0
 
     # TTC levels + solver
     ttc_warning_s: float = 3.0            # protocol screening window
