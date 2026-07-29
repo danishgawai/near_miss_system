@@ -20,6 +20,19 @@ class Config:
     write_video: bool = True
     write_traces: bool = True        # per-pair TTC/PET traces for AC6 plots
 
+    # ── Calibration guards ────────────────────────────────────────────────
+    # Applying one camera's homography/ROI to another video yields plausible-
+    # looking but geometrically wrong output, so it fails silently. These guards
+    # make it fail loudly instead.
+    strict_calibration: bool = True   # abort when the site config doesn't match the source
+    # Empirical health thresholds — a STOPPED vehicle must not move in the BEV
+    # plane. A mis-calibrated site measured 6.9 m median / 44.2 m max wander.
+    calib_stopped_speed_mps: float = 0.5   # below this a track is "stopped"
+    calib_wander_warn_m: float = 2.0
+    calib_wander_fail_m: float = 4.0
+    calib_min_scene_span_m: float = 20.0   # a junction is tens of metres across
+    calib_max_scene_span_m: float = 400.0
+
     # ── §4.1 Ingestion / FPS normalisation ────────────────────────────────
     fps_ceiling: float = 15.0        # effective processing-rate cap
     run_time_seconds: int = 100000   # wall-clock safety limit
