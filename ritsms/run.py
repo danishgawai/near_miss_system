@@ -41,6 +41,23 @@ def _footprint_width_m(projector, bbox):
     return projector.segment_length_m((float(x1), float(y2)), (float(x2), float(y2)))
 
 
+def _away_dir(projector, gx, gy, step_px=12.0):
+    """Ground-plane unit vector pointing away from the camera at (gx, gy).
+
+    Obtained by projecting the reference point and a point slightly higher in the
+    image (deeper into the scene) and taking the BEV difference. The vehicle body
+    extends in this direction from its near-face ground contact, so it is what
+    anchors the footprint correctly.
+    """
+    a = projector.to_bev_meters(gx, gy)
+    b = projector.to_bev_meters(gx, max(0.0, gy - step_px))
+    if a is None or b is None:
+        return None
+    d = np.asarray(b, dtype=np.float64) - np.asarray(a, dtype=np.float64)
+    n = float(np.linalg.norm(d))
+    return (d / n) if n > 1e-6 else None
+
+
 def _draw(frame, tracks, level_of, active, cfg, frame_idx, total, fps, site=None, projector=None):
     # ROI boundary (yellow) so the reference video shows what is analysed.
     if site is not None and site.roi_enabled and site.roi_polygon_img is not None:
@@ -184,7 +201,8 @@ def run(cfg: Config, max_frames=None, verify_only=False):
                 dt = max(1, fi - trk.last_update_frame if trk.last_update_frame > 0 else 1) / fps
                 bev = projector.to_bev_meters(gx, gy)
                 trk.update(bev, [int(x1), int(y1), int(x2), int(y2)], (int(gx), int(gy)),
-                           score, fi, dt, _footprint_width_m(projector, box))
+                           score, fi, dt, _footprint_width_m(projector, box),
+                           away_dir=_away_dir(projector, gx, gy))
 
             for tid in list(tracks):
                 if tid not in active:

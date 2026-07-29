@@ -358,7 +358,39 @@ class ConflictEngine:
                 else:
                     angle = math.degrees(M.interaction_angle(va, vb))
 
+                # ---- lane discipline for SAME-DIRECTION pairs ----------------
+                # The rear-end TTC formula assumes both users are "on the same
+                # line of travel". An adjacent-lane pair breaks that premise, so
+                # it is either a lane-change/side-swipe (if actually converging
+                # laterally) or simple parallel travel (no conflict at all).
+                same_dir_override = None
+                if angle <= cfg.heading_rear_end_max_deg:
+                    fast, slow = ((trk_a, trk_b) if trk_a.speed >= trk_b.speed
+                                  else (trk_b, trk_a))
+                    sp = float(np.linalg.norm(fast.velocity))
+                    if sp > 1e-6:
+                        h = np.asarray(fast.velocity, dtype=np.float64) / sp
+                        rel = np.asarray(slow.position_m, dtype=np.float64) - \
+                              np.asarray(fast.position_m, dtype=np.float64)
+                        lat = abs(float(rel[0] * h[1] - rel[1] * h[0]))
+                        if lat > cfg.lat_limit_rear_end_m:
+                            # lateral closing rate: is the gap across lanes shrinking?
+                            dv = np.asarray(slow.velocity, dtype=np.float64) - \
+                                 np.asarray(fast.velocity, dtype=np.float64)
+                            lat_rate = float(dv[0] * h[1] - dv[1] * h[0])
+                            side = float(rel[0] * h[1] - rel[1] * h[0])
+                            lat_closing = -lat_rate * np.sign(side) if side != 0 else 0.0
+                            if lat_closing < cfg.sideswipe_min_lat_closing_mps:
+                                continue          # parallel travel in separate lanes
+                            same_dir_override = "lane_change_merge"
+
                 encounter, governing = self._encounter(trk_a, trk_b, angle)
+                if same_dir_override:
+                    vuln = (trk_a.cls_name in cfg.vulnerable_classes or
+                            trk_b.cls_name in cfg.vulnerable_classes)
+                    encounter = (f"vehicle_vru_{same_dir_override}" if vuln
+                                 else same_dir_override)
+                    governing = "TTC"
                 ped = self._ped(trk_a.cls_name) or self._ped(trk_b.cls_name)
 
                 ttc, ttc_lvl, pet, pet_lvl, pet_src = None, "SAFE", None, "SAFE", None

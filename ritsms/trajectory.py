@@ -63,6 +63,10 @@ class TrackTrajectory:
     direction_consistency: float = 0.0
     length_m: float = 4.5
     width_m: float = 1.8
+    # Ground-plane unit vector pointing away from the camera at this track's
+    # location; set by the caller from the homography. Used to anchor the
+    # footprint at the vehicle's near face rather than its centre.
+    away_dir: Optional[np.ndarray] = None
 
     # tracking-quality
     jump_count: int = 0
@@ -98,6 +102,24 @@ class TrackTrajectory:
     @property
     def radius_m(self) -> float:
         return 0.5 * self.width_m
+
+    def footprint_center(self) -> np.ndarray:
+        """Centre of the vehicle's ground footprint.
+
+        The tracked point is the bbox bottom-centre, i.e. the ground contact of
+        the vehicle's NEAR face (the rear bumper when seen from behind), not its
+        centroid. Centring the L x W rectangle on it would push the footprint
+        ~L/2 behind the real bumper, into the space a following or adjacent
+        vehicle occupies -- which manufactured TTC=0 "contact" at IP33B.
+
+        ``away_dir`` is the ground-plane direction leading away from the camera
+        (supplied by the caller, which owns the homography), so the footprint is
+        shifted from the near face towards the vehicle body.
+        """
+        p = self.position_m
+        if self.away_dir is None:
+            return p
+        return p + self.away_dir * (0.5 * self.length_m)
 
     # ── Kalman ──────────────────────────────────────────────────────────────
 
@@ -136,7 +158,7 @@ class TrackTrajectory:
         ], dtype=np.float64) * s
 
     def update(self, bev_pos, bbox, img_point, det_score, frame_idx, dt_s,
-               measured_width_m=None):
+               measured_width_m=None, away_dir=None):
         """Advance the track one processed frame. bev_pos is metres (or None if
         the point was unprojectable — treated as a miss)."""
         c = self.cfg
@@ -146,6 +168,8 @@ class TrackTrajectory:
             self.last_bbox = [int(v) for v in bbox]
         if img_point is not None:
             self.last_img_point = (int(img_point[0]), int(img_point[1]))
+        if away_dir is not None:
+            self.away_dir = np.asarray(away_dir, dtype=np.float64)
         if measured_width_m is not None and measured_width_m > 0:
             prior = c.class_size_lw_m.get(self.cls_name, (4.5, 1.8))[1]
             self.width_m = float(np.clip(measured_width_m, 0.5 * prior, 2.0 * prior))
@@ -258,7 +282,9 @@ class TrackTrajectory:
         horizon = c.forecast_horizon_s if horizon_s is None else horizon_s
         dt = c.forecast_dt_s if dt_s is None else dt_s
         ts = np.arange(0.0, horizon + 1e-9, dt)
-        p0 = self.position_m
+        # Forecast the FOOTPRINT centre, so predicted rectangles sit on the
+        # vehicle body rather than straddling the space behind its near face.
+        p0 = self.footprint_center()
         v = self.velocity
         theta0 = math.atan2(v[1], v[0]) if self.speed > 1e-6 else math.radians(self.heading_deg)
 
