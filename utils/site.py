@@ -53,6 +53,7 @@ class SiteConfig:
         self.roi_enabled = False
         self.roi_polygon_img = None          # cv2 contour (N,1,2) in pixels or None
         self.zones: List[ConflictZone] = []
+        self.geo = None                      # GeoCalibration when metric-validated
         self._load(path)
 
     # ── metadata ──────────────────────────────────────────────────────────
@@ -90,6 +91,23 @@ class SiteConfig:
         )
         self.reprojection_rmse_m = cfg.get("reprojection_rmse_m")
         self.reprojection_p95_m = cfg.get("reprojection_p95_m")
+
+        # A lat/lng ground-control-point calibration IS metric validation: the
+        # homography maps to real metres and the reprojection error is measured
+        # in metres, which is exactly what proposal AC1 requires. Detecting it
+        # here promotes the site out of bev_only automatically, so speed, DRAC,
+        # Delta-V and the *_M columns stop being flagged conditional.
+        if cfg.get("correspondences"):
+            from utils.geo_calib import load_gcp_calibration
+            geo = load_gcp_calibration(path)
+            if geo is not None:
+                self.geo = geo
+                self.calibration_confidence = "metric_validated"
+                self.reprojection_rmse_m = round(geo.rmse_m, 4)
+                self.reprojection_p95_m = round(geo.p95_m, 4)
+                logging.info("Site is METRIC-VALIDATED from %d GCPs "
+                             "(RMSE %.3f m, P95 %.3f m) - AC1 satisfied",
+                             len(geo.src_px), geo.rmse_m, geo.p95_m)
 
         roi = cfg.get("roi_polygon_bev_m")
         if roi and len(roi) >= 3:

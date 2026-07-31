@@ -25,6 +25,7 @@ from collections import defaultdict, deque
 from typing import Dict, List, Optional, Tuple
 
 from utils import measures as M
+from ritsms.patterns import crash_codes_for
 
 LEVEL_ORDER = {"SAFE": 0, "WARNING": 1, "CRITICAL": 2}
 
@@ -404,6 +405,13 @@ class ConflictEngine:
                                              trk_a.length_m, trk_a.width_m,
                                              trk_b.length_m, trk_b.width_m,
                                              cfg.footprint_buffer_m)
+                    # ttc == 0 means the footprints ALREADY overlap, i.e. contact
+                    # has occurred. For road users that is a collision, not a
+                    # near-miss, and in practice it is nearly always a modelling
+                    # artifact (footprint priors vs occlusion-corrupted reference
+                    # points). Require a genuine future collision course.
+                    if ttc is not None and ttc <= cfg.ttc_min_reportable_s:
+                        ttc = None
                     below = ttc is not None and ttc < cfg.ttc_warning_s
                     nfb3, nwin, nfb3_ok = self.nfb3.update(key, below)
                     if ttc is not None and nfb3_ok:
@@ -473,6 +481,11 @@ class ConflictEngine:
                 zones = self.site.zones_containing(cpt) if self.site else []
                 self._conflict_seq += 1
 
+                # Georeference the conflict point when the site is metric-validated
+                # (lat/lng GCP calibration) -- BEV metres are true East/North then.
+                geo = getattr(self.site, "geo", None) if self.site else None
+                conflict_geo = geo.geo_for(float(cpt[0]), float(cpt[1])) if geo else None
+
                 incidents.append({
                     "site_id": cfg.site_id,
                     "conflict_id": self._conflict_seq,
@@ -483,6 +496,7 @@ class ConflictEngine:
                     "roaduser1_id": id_a, "roaduser2_id": id_b,
                     "roaduser1_type": trk_a.cls_name, "roaduser2_type": trk_b.cls_name,
                     "encounter_type": encounter,
+                    "crash_codes": crash_codes_for(encounter),
                     "governing_measure": governing,
                     "level": final,
                     "ttc_s": round(ttc, 3) if ttc is not None else None,
@@ -494,6 +508,9 @@ class ConflictEngine:
                     "nfb3": int(nfb3), "nfb3_window": int(nwin),
                     "conflict_x_bev": round(float(cpt[0]), 3),
                     "conflict_y_bev": round(float(cpt[1]), 3),
+                    "conflict_lat": round(conflict_geo["lat"], 8) if conflict_geo else None,
+                    "conflict_lng": round(conflict_geo["lng"], 8) if conflict_geo else None,
+                    "conflict_utm": conflict_geo["utm"] if conflict_geo else None,
                     "interaction_angle_deg": round(angle, 1),
                     "closing_speed_mps": round(closing, 2),
                     "relative_speed_mps": round(float(np.linalg.norm(va - vb)), 2),

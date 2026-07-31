@@ -27,7 +27,33 @@ class BEVProjector:
         self.calibrated = False
         self._w_sign = 1.0
         self._H_inv = None
-        self._load(path)
+        # Metric (survey-grade) calibration from lat/lng ground-control points.
+        # When present it REPLACES the BEV-canvas homography: H then maps pixels
+        # straight to East/North metres, so ppm is 1.0 and every downstream
+        # threshold is in true physical units.
+        self.geo = None
+        self._load_metric(path)
+        if self.geo is None:
+            self._load(path)
+
+    def _load_metric(self, path: str):
+        from utils.geo_calib import load_gcp_calibration
+        geo = load_gcp_calibration(path)
+        if geo is None:
+            return
+        self.geo = geo
+        self.H = geo.H
+        self._H_inv = geo.H_inv
+        self.ppm = 1.0                 # H already outputs metres
+        self._w_sign = geo._w_sign
+        self.calibrated = True
+        logging.info("BEV in METRIC mode (lat/lng GCPs): RMSE=%.3f m P95=%.3f m",
+                     geo.rmse_m, geo.p95_m)
+
+    @property
+    def metric(self) -> bool:
+        """True when a survey-grade lat/lng calibration is in use."""
+        return self.geo is not None
 
     @property
     def H_inv(self):

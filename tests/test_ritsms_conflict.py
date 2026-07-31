@@ -227,6 +227,29 @@ def test_footprint_center_offsets_from_near_face():
     assert abs(float(off[0]) - t.length_m / 2.0) < 1e-9 and abs(float(off[1])) < 1e-9
 
 
+def test_already_overlapping_is_not_reported():
+    # ttc == 0 means the footprints already overlap, i.e. contact has occurred.
+    # For road users that is a collision, not a near-miss, and in practice it is
+    # a footprint/occlusion artifact - it must not be published as a conflict.
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {
+        1: _ftrack(1, (0, 0), (10, 0), cfg),
+        2: _ftrack(2, (1.0, 0.1), (4, 0), cfg),      # centres 1 m apart -> overlapping
+    }
+    for e in _drive(eng, tracks, frames=10):
+        assert e["ttc_s"] != 0.0, e
+
+
+def test_conflicts_carry_crash_codes():
+    cfg = Config()
+    eng = ConflictEngine(cfg, fps=10.0, site=None)
+    tracks = {1: _ftrack(1, (0, 0), (5, 0), cfg), 2: _ftrack(2, (20, 0), (-5, 0), cfg)}
+    inc = _drive(eng, tracks, frames=8)
+    assert inc, "expected a head-on conflict"
+    assert inc[0]["crash_codes"], "conflict records must carry reference crash codes"
+
+
 def test_engine_ignores_far_apart():
     cfg = Config()
     eng = ConflictEngine(cfg, fps=10.0, site=None)

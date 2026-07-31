@@ -136,6 +136,12 @@ class Config:
     ttc_warning_s: float = 3.0            # protocol screening window
     ttc_critical_s: float = 1.5
     ttc_min_closing_mps: float = 2.0      # reject queued/crawling non-approaching pairs
+    # A TTC at or below this is "already in contact" -> a collision, not a
+    # near-miss, and in practice a footprint/occlusion artifact. Measured at
+    # IP86B: 12 of 14 ttc=0 events had a longitudinal separation smaller than the
+    # combined footprint half-lengths, and the closest was 0.30 m - physically
+    # impossible between two distinct vehicles.
+    ttc_min_reportable_s: float = 0.0
     use_oriented_footprints: bool = True  # SAT over predicted footprints (uses CTRV)
 
     # NFb3 validity (TTC): last window_s, >= fraction of frames below ttc_warning_s

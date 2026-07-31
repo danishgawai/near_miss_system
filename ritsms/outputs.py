@@ -31,10 +31,11 @@ TRAJ_FIELDS = [
 
 CONFLICT_FIELDS = [
     "Site_ID", "Conflict_ID", "RoadUser1_id", "RoadUser2_id",
-    "RoadUser1_type", "RoadUser2_type", "Encounter_type", "ConflictLevel",
+    "RoadUser1_type", "RoadUser2_type", "Encounter_type", "CrashCodes",
+    "ConflictLevel",
     "ttc", "pet", "drac", "deltav", "NFb3", "ConflictX_BEV", "ConflictY_BEV",
-    "ConflictX_M", "ConflictY_M", "CaptureTimeStamp", "CorrectTimeStamp",
-    "InteractionAngle",
+    "ConflictX_M", "ConflictY_M", "ConflictLat", "ConflictLng",
+    "CaptureTimeStamp", "CorrectTimeStamp", "InteractionAngle",
 ]
 
 
@@ -92,7 +93,9 @@ class ConflictWriter:
             "Site_ID": e["site_id"], "Conflict_ID": e["conflict_id"],
             "RoadUser1_id": e["roaduser1_id"], "RoadUser2_id": e["roaduser2_id"],
             "RoadUser1_type": e["roaduser1_type"], "RoadUser2_type": e["roaduser2_type"],
-            "Encounter_type": e["encounter_type"], "ConflictLevel": e["level"],
+            "Encounter_type": e["encounter_type"],
+            "CrashCodes": "|".join(e.get("crash_codes") or []),
+            "ConflictLevel": e["level"],
             "ttc": e["ttc_s"] if e["ttc_s"] is not None else "",
             "pet": e["pet_s"] if e["pet_s"] is not None else "",
             "drac": e["drac_mps2"] if e["drac_mps2"] is not None else "",
@@ -101,6 +104,8 @@ class ConflictWriter:
             "ConflictX_BEV": e["conflict_x_bev"], "ConflictY_BEV": e["conflict_y_bev"],
             "ConflictX_M": e["conflict_x_bev"] if m else "",
             "ConflictY_M": e["conflict_y_bev"] if m else "",
+            "ConflictLat": e.get("conflict_lat") if e.get("conflict_lat") is not None else "",
+            "ConflictLng": e.get("conflict_lng") if e.get("conflict_lng") is not None else "",
             "CaptureTimeStamp": e.get("timestamp", ""),
             "CorrectTimeStamp": e.get("correct_timestamp") or "",
             "InteractionAngle": e["interaction_angle_deg"],
